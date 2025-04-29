@@ -4,7 +4,6 @@
 [![License](https://img.shields.io/badge/license-GPL%20v3-yellow?color=goldenrod)](https://github.com/immorrtalz/Mephryl/blob/main/LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/immorrtalz/Mephryl?color=orange)]()
 [![CodeFactor](https://www.codefactor.io/repository/github/immorrtalz/Mephryl/badge)](https://www.codefactor.io/repository/github/immorrtalz/Mephryl)
-[![virustotal](https://github.com/immorrtalz/Mephryl/actions/workflows/virustotal.yml/badge.svg)](https://github.com/immorrtalz/Mephryl/actions/workflows/virustotal.yml)
 [![Discord](https://img.shields.io/discord/600372807062519848?label=developer's%20discord&color=slateblue)](https://discord.gg/GbzYVdF)
 
 Simple image converter with modern design
