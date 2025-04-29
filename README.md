@@ -1,40 +1,21 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/pages/api-reference/create-next-app).
+# Mephryl
 
-## Getting Started
+[![Latest Release](https://img.shields.io/badge/latest%20release-limegreen)](https://evermedia.immorrtalz.com/mephryl)
+[![License](https://img.shields.io/badge/license-GPL%20v3-yellow?color=goldenrod)](https://github.com/immorrtalz/Mephryl/blob/main/LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/immorrtalz/Mephryl?color=orange)]()
+[![CodeFactor](https://www.codefactor.io/repository/github/immorrtalz/Mephryl/badge)](https://www.codefactor.io/repository/github/immorrtalz/Mephryl)
+[![virustotal](https://github.com/immorrtalz/Mephryl/actions/workflows/virustotal.yml/badge.svg)](https://github.com/immorrtalz/Mephryl/actions/workflows/virustotal.yml)
+[![Discord](https://img.shields.io/discord/600372807062519848?label=developer's%20discord&color=slateblue)](https://discord.gg/GbzYVdF)
 
-First, run the development server:
+Simple image converter with modern design
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+---
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open source, lightweight, fast and available in web
 
-You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+> [!TIP]
+> Use the latest release: https://evermedia.immorrtalz.com/mephryl
 
-[API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) can be accessed on [http://localhost:3000/api/hello](http://localhost:3000/api/hello). This endpoint can be edited in `pages/api/hello.ts`.
+---
 
-The `pages/api` directory is mapped to `/api/*`. Files in this directory are treated as [API routes](https://nextjs.org/docs/pages/building-your-application/routing/api-routes) instead of React pages.
-
-This project uses [`next/font`](https://nextjs.org/docs/pages/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn-pages-router) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/pages/building-your-application/deploying) for more details.
+Font "Poppins" - Copyright © 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins)
