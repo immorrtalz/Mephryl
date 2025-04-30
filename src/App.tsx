@@ -1,106 +1,98 @@
-import Head from 'next/head';
-import { Poppins } from 'next/font/google';
-import styles from '@/styles/Home.module.scss';
-import Button from '@/components/Button';
-import { LinkSVG, UploadSVG } from '@/components/SVGLibrary';
+import styles from './App.module.scss';
+import Button from './components/Button';
+import { LinkSVG, UploadSVG } from './components/SVGLibrary';
 import { useEffect } from 'react';
 import { ImageMagick, initializeImageMagick, Magick, MagickFormat } from '@imagemagick/magick-wasm';
-import { isMagickInitialized, InitMagick } from '@/scripts/ImageMagickManager';
+import { isMagickInitialized, InitMagick } from './scripts/ImageMagickManager';
 
-const poppins = Poppins(
-{
-	variable: '--font-poppins',
-	subsets: ['latin', 'latin-ext'],
-	weight: ['400', '500', '600']
-});
+const supportedExtensions = '.apng, .avif, .bmp, .dng, .eps, .gif, .hdr, .heic, .heif, .ico, .jpg, .jpeg, .png, .psd, .raw, .svg, .tga, .tif, .tiff, .webp';
 
-export default function Home()
+export default function App()
 {
+	//const [count, setCount] = useState(0);
+
+	/* 
 	InitMagick().then(() => console.log('ImageMagick initialized'));
+	var imageInput : HTMLInputElement;
 
-	function selectFile(contentType : string = '.apng, .avif, .bmp, .dng, .eps, .gif, .hdr, .heic, .heif, .ico, .jpg, .jpeg, .png, .psd, .raw, .svg, .tga, .tif, .tiff, .webp', multiple : boolean = false)
+	/* function setImageInput() { imageInput = document.getElementById('imageInput') as HTMLInputElement; }
+	setImageInput(); */
+
+	/*imageInput = document.getElementById('imageInput') as HTMLInputElement;
+
+	imageInput.onchange = () =>
 	{
-		var input = document.createElement('input');
-		input.type = 'file';
-		input.multiple = multiple;
-		input.accept = contentType;
-		input.id = 'imageInput';
+		if (imageInput.files === undefined || imageInput.files === null) return;
 
-		input.onchange = () =>
+		var file = imageInput.files[0];
+		var reader = new FileReader();
+
+		reader.onload = (e) =>
 		{
-			/* const imageInput = document.getElementById('imageInput') as HTMLInputElement; */
+			const result = (e.target!.result as string);
 
-			if (input.files === undefined || input.files === null) return;
+			// Определяем формат изображения по dataURL
+			const isPng = result.startsWith('data:image/png');
+			const isJpg = result.startsWith('data:image/jpeg') || result.startsWith('data:image/jpg');
 
-			var file = input.files[0];
-			var reader = new FileReader();
+			let targetFormat: MagickFormat = MagickFormat.Jpeg;
+			let downloadMime = 'image/jpeg';
+			let downloadExt = 'jpg';
 
-			reader.onload = (e) =>
+			if (isJpg)
 			{
-				const result = (e.target!.result as string);
+				targetFormat = MagickFormat.Png;
+				downloadMime = 'image/png';
+				downloadExt = 'png';
+			}
+			else if (isPng)
+			{
+				targetFormat = MagickFormat.Jpeg;
+				downloadMime = 'image/jpeg';
+				downloadExt = 'jpg';
+			}
 
-				// Определяем формат изображения по dataURL
-				const isPng = result.startsWith('data:image/png');
-				const isJpg = result.startsWith('data:image/jpeg') || result.startsWith('data:image/jpg');
+			// Убираем префикс dataURL, оставляем только base64
+			const base64Data = result.replace(/^data:.*;base64,/, '');
 
-				let targetFormat: MagickFormat = MagickFormat.Jpeg;
-				let downloadMime = 'image/jpeg';
-				let downloadExt = 'jpg';
+			// Преобразуем base64 в Uint8Array для ImageMagick.read
+			const binaryString = atob(base64Data);
+			const len = binaryString.length;
+			const bytes = new Uint8Array(len);
 
-				/* if (isJpg)
+			for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
+
+			ImageMagick.read(bytes, image =>
+			{
+				image.write(targetFormat, data =>
 				{
-					targetFormat = MagickFormat.Png;
-					downloadMime = 'image/png';
-					downloadExt = 'png';
-				}
-				else if (isPng)
-				{
-					targetFormat = MagickFormat.Jpeg;
-					downloadMime = 'image/jpeg';
-					downloadExt = 'jpg';
-				} */
+					const blob = new Blob([data], { type: downloadMime });
+					const url = URL.createObjectURL(blob);
 
-				targetFormat = MagickFormat.Gif;
-				downloadMime = 'image/gif';
-				downloadExt = 'gif';
+					const link = document.createElement('a');
+					link.href = url;
+					link.download = `converted-image.${downloadExt}`;
+					document.body.appendChild(link);
+					link.click();
+					document.body.removeChild(link);
 
-				// Убираем префикс dataURL, оставляем только base64
-				const base64Data = result.replace(/^data:.*;base64,/, '');
-
-				// Преобразуем base64 в Uint8Array для ImageMagick.read
-				const binaryString = atob(base64Data);
-				const len = binaryString.length;
-				const bytes = new Uint8Array(len);
-
-				for (let i = 0; i < len; i++) bytes[i] = binaryString.charCodeAt(i);
-
-				ImageMagick.read(bytes, image =>
-				{
-					image.write(targetFormat, data =>
-					{
-						const blob = new Blob([data], { type: downloadMime });
-						const url = URL.createObjectURL(blob);
-
-						const link = document.createElement('a');
-						link.href = url;
-						link.download = `converted-image.${downloadExt}`;
-						document.body.appendChild(link);
-						link.click();
-						document.body.removeChild(link);
-
-						URL.revokeObjectURL(url);
-					});
+					URL.revokeObjectURL(url);
 				});
-			};
-
-			reader.readAsDataURL(file);
+			});
 		};
 
-		input.click();
+		reader.readAsDataURL(file);
+	}; */
+
+	function selectImageFiles()
+	{
+		//imageInput.click();
 	}
 
 	return (
-		<div className={`${styles.pageContainer} ${poppins.variable}`}>
+		<div className={styles.pageContainer}>
+
+			<input id='imageInput' className={styles.imageInput} type='file' accept={supportedExtensions} multiple/>
 
 			<header className={styles.header}>
 				<svg width='202' height='47' viewBox='0 0 202 47' className={styles.logo} xmlns='http://www.w3.org/2000/svg'>
@@ -130,7 +122,7 @@ export default function Home()
 					<Button
 						title='Upload'
 						svg={<UploadSVG className='fillWhite90'/>}
-						onClick={selectFile}/>
+						onClick={selectImageFiles}/>
 
 					<Button
 						isSquare='true'

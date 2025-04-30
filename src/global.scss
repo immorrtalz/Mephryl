@@ -1,3 +1,35 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* #region Fonts */
+.fontRegular
+{
+	font-family: Poppins, sans-serif;
+	font-style: normal;
+	font-weight: 400;
+}
+
+.fontMedium
+{
+	font-family: Poppins, sans-serif;
+	font-style: normal;
+	font-weight: 500;
+}
+
+.fontSemibold
+{
+	font-family: Poppins, sans-serif;
+	font-style: normal;
+	font-weight: 600;
+}
+
+.fontBold
+{
+	font-family: Poppins, sans-serif;
+	font-style: normal;
+	font-weight: 700;
+}
+/* #endregion */
+
 :root
 {
 	--clr-dark: #101012;
@@ -20,7 +52,7 @@
 	-moz-osx-font-smoothing: grayscale;
 	text-rendering: optimizeLegibility;
 
-	font-family: var(--font-poppins);
+	font-family: Poppins;
 	font-size: var(--main-font-size);
 	font-weight: 400;
 
@@ -80,11 +112,6 @@ a
 }
 
 .enablePointerEvents { pointer-events: all; }
-
-.fontRegular { font-weight: 400; }
-.fontMedium { font-weight: 500; }
-.fontSemibold { font-weight: 600; }
-.fontBold { font-weight: 700; }
 
 .font12 { font-size: 12px; }
 .font14 { font-size: 14px; }
