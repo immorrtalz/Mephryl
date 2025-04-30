@@ -2,21 +2,28 @@
 {
 	appearance: none;
 	outline: none;
+	border: none;
 	width: fit-content;
 	height: 50px !important;
 	padding: 0 26px;
-	border: 2px solid transparent;
 	border-radius: var(--main-border-radius);
-	background: var(--clr-accent);
 	display: flex;
 	flex-direction: row;
 	flex-wrap: nowrap;
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
-	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
 	pointer-events: all;
 	cursor: pointer;
+}
+
+.primaryButton
+{
+	border: 2px solid transparent;
+	background: var(--clr-accent);
+	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+	color: rgba(255, 255, 255, 0.9);
+	fill: rgba(255, 255, 255, 0.9);
 
 	&::before
 	{
@@ -35,11 +42,10 @@
 	{
 		color: rgba(0, 0, 0, 0.65);
 		box-shadow: 0 8px 64px 0 color-mix(in srgb, var(--clr-accent) 75%, white 20%);
+		fill: rgba(0, 0, 0, 0.65);
 		z-index: 1;
 
 		&::before { opacity: 1; }
-
-		svg { fill: rgba(0, 0, 0, 0.65); }
 	}
 
 	&:active
@@ -48,10 +54,57 @@
 		color: color-mix(in srgb, var(--clr-accent), white 50%);
 		border: 2px solid color-mix(in srgb, var(--clr-accent), white 50%);
 		box-shadow: 0 8px 64px 0 color-mix(in srgb, var(--clr-accent) 25%, transparent);
+		fill: color-mix(in srgb, var(--clr-accent), white 50%);
 
 		&::before { opacity: 0; }
+	}
+}
 
-		svg { fill: color-mix(in srgb, var(--clr-accent), white 50%); }
+.secondaryButton
+{
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+	color: rgba(255, 255, 255, 0.75);
+	fill: rgba(255, 255, 255, 0.75);
+
+	&:hover
+	{
+		background: rgba(255, 255, 255, 0.35);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.35);
+		color: rgba(255, 255, 255, 0.9);
+		fill: rgba(255, 255, 255, 0.9);
+	}
+
+	&:active
+	{
+		background: rgba(255, 255, 255, 0.05);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+		color: rgba(255, 255, 255, 0.35);
+		fill: rgba(255, 255, 255, 0.35);
+	}
+}
+
+.secondaryButtonDestructive
+{
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+	color: rgba(255, 89, 89, 0.75);
+	fill: rgba(255, 89, 89, 0.75);
+
+	&:hover
+	{
+		background: rgba(255, 89, 89, 0.75);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.35);
+		color: rgba(255, 255, 255, 0.9);
+		fill: rgba(255, 255, 255, 0.9);
+	}
+
+	&:active
+	{
+		background: rgba(255, 89, 89, 0.15);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+		color: rgba(255, 89, 89, 0.35);
+		fill: rgba(255, 89, 89, 0.35);
 	}
 }
 
