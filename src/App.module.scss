@@ -28,6 +28,23 @@ header
 
 	.logo
 	{
+		width: fit-content;
+		height: fit-content;
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		gap: 4px;
+	}
+
+	.logoImg
+	{
+		margin-top: -10px;
+		width: 64px;
+		object-fit: contain;
+	}
+
+	.logoSVG
+	{
 		fill: transparent;
 		background: radial-gradient(circle at center,
 			color-mix(in srgb, var(--clr-accent), white 75%),
@@ -68,13 +85,21 @@ main
 	width: 900px;
 	height: fit-content;
 	padding: 40px 10px;
-	border: 2px dashed var(--clr-accent);
 	border-radius: calc(66px - 8px); /* 2px border does NOT actually add space and it is outside - not inside */
 	display: flex;
 	flex-direction: column;
 	align-items: center;
 	flex-wrap: nowrap;
 	pointer-events: all;
+
+	&.uploadPhase { border: 2px dashed var(--clr-accent); }
+
+	&.mainOnDragOver
+	{
+		&.uploadPhase { border-color: rgba(255, 255, 255, 0.9); }
+
+		&::before { background: rgba(255, 255, 255, 0.15); }
+	}
 
 	@media (max-width: 1024px)
 	{
@@ -87,7 +112,6 @@ main
 		width: 90%;
 		padding: 30px 20px 20px 20px;
 	}
-
 
 	&::before
 	{
@@ -140,15 +164,19 @@ main
 
 	.mainDescription, .dragAndDropText, .toolLimitsText { white-space: pre-wrap; }
 
-	.buttonsContainer
+	.buttonsContainer1 { margin-bottom: 16px; }
+
+	.buttonsContainer1, .buttonsContainer2, .buttonsContainer3
 	{
 		width: fit-content;
 		height: fit-content;
 		display: flex;
 		flex-direction: row;
 		flex-wrap: nowrap;
+		justify-content: center;
 		gap: 8px;
-		margin-bottom: 16px;
+
+		@media (max-width: 768px) { flex-wrap: wrap; }
 	}
 
 	.uploadedImagesContainer
@@ -164,13 +192,6 @@ main
 
 		@media (max-width: 768px) { padding: 0 10px; }
 	}
-}
-
-.mainOnDragOver
-{
-	border-color: rgba(255, 255, 255, 0.9);
-
-	&::before { background: rgba(255, 255, 255, 0.15); }
 }
 
 footer

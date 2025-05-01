@@ -14,16 +14,13 @@ class Props
 	title? : string;
 	svg? : ReactElement;
 	square? : boolean;
+	disabled? : boolean;
 	onClick? : () => any;
 }
 
 export function Button(props : Props)
 {
-	const onClick = () =>
-	{
-		//alert('General button alert');
-		if (props.onClick !== undefined) props.onClick();
-	};
+	function onClick() { if (props.onClick) props.onClick(); };
 
 	var dynamicClassNames : string[] = [];
 
@@ -43,7 +40,7 @@ export function Button(props : Props)
 	if (props.square) dynamicClassNames.push(styles.squareButton);
 
 	return (
-		<button className={`${styles.button} ${dynamicClassNames.join(' ')} fontMedium bgBlur`} onClick={onClick}>
+		<button className={`${styles.button} ${dynamicClassNames.join(' ')} fontMedium bgBlur`} onClick={onClick} disabled={props.disabled}>
 			{props.svg}
 			{props.title}
 		</button>

@@ -13,8 +13,18 @@
 	align-items: center;
 	justify-content: center;
 	gap: 10px;
+	flex-shrink: 0;
 	pointer-events: all;
 	cursor: pointer;
+
+	&:disabled
+	{
+		background: rgba(255, 255, 255, 0.05);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.1);
+		color: rgba(255, 255, 255, 0.25);
+		fill: rgba(255, 255, 255, 0.25);
+		pointer-events: none;
+	}
 }
 
 .primaryButton

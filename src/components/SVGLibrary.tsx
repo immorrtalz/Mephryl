@@ -1,4 +1,4 @@
-export function LogoSVG(props : any)
+export function LogoTextSVG(props : any)
 {
 	return (
 		<svg width='202' height='47' viewBox='0 0 202 47' className={props.className} xmlns='http://www.w3.org/2000/svg'>
