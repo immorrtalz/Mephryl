@@ -87,8 +87,6 @@ html
 	&::-webkit-scrollbar-track { background: var(--clr-dark); }
 	&::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.35); border-radius: 3.5px; }
 	&::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
-	/* &::-webkit-scrollbar-button:start:increment { height: 16px; }
-	&::-webkit-scrollbar-button:end:increment { height: 16px; } */
 }
 
 body
@@ -138,6 +136,7 @@ a
 
 .colorWhite35 { color: rgba(255, 255, 255, 0.35); }
 .colorWhite50 { color: rgba(255, 255, 255, 0.5); }
+.colorWhite75 { color: rgba(255, 255, 255, 0.75); }
 .colorWhite90 { color: rgba(255, 255, 255, 0.9); }
 
 .bgBlur { backdrop-filter: blur(var(--blur-bg)); }

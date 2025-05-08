@@ -11,6 +11,7 @@
 	background: rgba(0, 0, 0, 0.15);
 	border: 1px solid rgba(255, 255, 255, 0.15);
 	border-radius: calc(var(--main-border-radius) + 10px);
+	pointer-events: all;
 
 	& > img
 	{
@@ -18,13 +19,19 @@
 		height: 50px;
 		border-radius: var(--main-border-radius);
 		object-fit: fill;
-
-
-		background: gray; //TODO: remove this
 	}
 
-	& > Button:nth-of-type(1) { margin-left: auto; }
-	& > Button:nth-of-type(2) { margin-left: -2px; }
+	.buttonsContainer
+	{
+		width: fit-content;
+		height: fit-content;
+		margin-left: auto;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+		gap: 8px;
+	}
 
 	.textsContainer
 	{

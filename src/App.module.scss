@@ -85,6 +85,7 @@ main
 	width: 900px;
 	height: fit-content;
 	padding: 40px 10px;
+	border: 2px dashed transparent;
 	border-radius: calc(66px - 8px); /* 2px border does NOT actually add space and it is outside - not inside */
 	display: flex;
 	flex-direction: column;
@@ -92,7 +93,7 @@ main
 	flex-wrap: nowrap;
 	pointer-events: all;
 
-	&.uploadPhase { border: 2px dashed var(--clr-accent); }
+	&.uploadPhase { border-color: var(--clr-accent); }
 
 	&.mainOnDragOver
 	{

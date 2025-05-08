@@ -8,21 +8,20 @@ export enum ButtonType
 	SecondaryDestructive
 }
 
-class Props
+interface Props
 {
-	type? : ButtonType;
-	title? : string;
-	svg? : ReactElement;
-	square? : boolean;
-	disabled? : boolean;
-	onClick? : () => any;
+	type?: ButtonType;
+	title?: string;
+	svg?: ReactElement;
+	square?: boolean;
+	disabled?: boolean;
+	onClick?: (...args: any[]) => any;
 }
 
-export function Button(props : Props)
+export function Button(props: Props)
 {
-	function onClick() { if (props.onClick) props.onClick(); };
-
-	var dynamicClassNames : string[] = [];
+	const onClick = () => props.onClick?.();
+	var dynamicClassNames: string[] = [];
 
 	switch (props.type)
 	{
