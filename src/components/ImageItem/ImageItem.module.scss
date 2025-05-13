@@ -55,4 +55,16 @@
 
 		.info { color: rgba(255, 255, 255, 0.35); }
 	}
+
+	.modalContentElement
+	{
+		width: fit-content;
+		height: fit-content;
+		display: flex;
+		flex-direction: row;
+		flex-wrap: nowrap;
+		align-items: center;
+		justify-content: center;
+		gap: 16px;
+	}
 }

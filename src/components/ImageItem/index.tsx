@@ -4,20 +4,30 @@ import { Button, ButtonType } from '../Button';
 import { DeleteSVG, DownloadSVG, SettingsSVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
+import { ModalWindow } from '../ModalWindow';
+import { Slider } from '../Slider';
+import { IsFormatLossy } from '../../scripts/IsFormatLossy';
 
 interface Props
 {
 	imageItem: ImageItemInfo;
 	phaseIndex: number;
 	supportedConvertFormats: string[];
-	onChangeConvertFormat?: (...args : any[]) => any;
+	onChangeOutputFormat?: (...args : any[]) => any;
+	onChangeOutputQuality?: (...args : any[]) => any;
 	onDownload?: (...args: any[]) => any;
 	onRemove?: (...args: any[]) => any;
 }
 
 export default function UploadedImageItem(props: Props)
 {
-	const onChangeConvertFormat = (format: string) => props.onChangeConvertFormat?.(format);
+	function onChangeOutputFormat(format: string)
+	{
+		if (!IsFormatLossy(props.imageItem.outputFormat)) onChangeOutputQuality(100);
+		props.onChangeOutputFormat?.(format);
+	}
+
+	const onChangeOutputQuality = (quality: number) => props.onChangeOutputQuality?.(quality);
 	const onDownload = () => props.onDownload?.();
 	function onRemove() { if (props.imageItem.file) props.onRemove?.(props.imageItem.file); };
 
@@ -31,9 +41,12 @@ export default function UploadedImageItem(props: Props)
 	for (; fileSizeUnitIndex < fileSizeUnits.length && fileSize >= 1024; fileSizeUnitIndex++) fileSize /= 1024;
 	fileSizeType = fileSizeUnits[fileSizeUnitIndex];
 
+	const [isModalOpened, setModalOpened] = useState(false);
+	const [qualityValue, setQualityValue] = useState(97);
+
 	return (
 		<div className={styles.uploadedImageItem}>
-			<img src={window.URL.createObjectURL(props.imageItem.file)} onLoad={e => setImageDimensions(`${(e.target as HTMLImageElement).naturalWidth}x${(e.target as HTMLImageElement).naturalHeight}px`)}/>
+			<img src={props.imageItem.inputFormat == 'dng' ? './src/assets/imagePreviewPlaceholder.jpg' : window.URL.createObjectURL(props.imageItem.file)} onLoad={e => setImageDimensions(`${(e.target as HTMLImageElement).naturalWidth}x${(e.target as HTMLImageElement).naturalHeight}px`)}/>
 			<div className={styles.textsContainer}>
 				<p className={`${styles.title} fontMedium`}>{props.phaseIndex == 3 ? `${props.imageItem.name}.${props.imageItem.outputFormat}` : props.imageItem.file.name}</p>
 				<p className={`${styles.info} font12`}>{imageDimensions} • {Math.floor(fileSize * 100) / 100} {fileSizeType}</p>
@@ -54,14 +67,35 @@ export default function UploadedImageItem(props: Props)
 												value: format
 											}))
 										}
-										onOptionClick={(format : string) => {onChangeConvertFormat(format)}}/>) : <></>
+										onOptionClick={(format : string) => {onChangeOutputFormat(format)}}/>) : <></>
 							}
 
-							<Button
-								type={ButtonType.Secondary}
-								svg={<SettingsSVG/>}
-								square
-								/* onClick={} *//>
+							{
+								IsFormatLossy(props.imageItem.outputFormat) ? (
+									<>
+										<Button
+											type={ButtonType.Secondary}
+											svg={<SettingsSVG/>}
+											square
+											onClick={() => setModalOpened(true)}/>
+
+										<ModalWindow open={isModalOpened}
+											title='Conversion settings'
+											okTitle='Apply'
+											onCancel={() => setModalOpened(false)}
+											onOK={() =>
+											{
+												onChangeOutputQuality(qualityValue);
+												setModalOpened(false);
+											}}>
+											<div className={styles.modalContentElement}>
+												<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
+												<Slider min={1} max={100} defaultValue={97} step={1} onInput={(e) => setQualityValue(Number(e.target.value))}/>
+												<p style={{width: '28px'}}>{qualityValue}</p>
+											</div>
+										</ModalWindow>
+									</>) : <></>
+							}
 
 							<Button
 								type={ButtonType.SecondaryDestructive}

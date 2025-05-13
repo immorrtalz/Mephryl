@@ -1,0 +1,113 @@
+.sliderContainer
+{
+	width: 150px;
+	height: 10px;
+
+	.slider
+	{
+		appearance: none;
+		-webkit-appearance: none;
+		outline: none;
+		border: none;
+		position: absolute;
+		inset: 0;
+		border-radius: 5px;
+		background: transparent;
+		flex-shrink: 0;
+		pointer-events: all;
+		cursor: pointer;
+		overflow: clip;
+
+		&::-webkit-slider-runnable-track
+		{
+			appearance: none;
+			-webkit-appearance: none;
+			width: 100%;
+			height: 100%;
+			border-radius: 5px;
+			background: rgba(255, 255, 255, 0.25);
+			backdrop-filter: blur(var(--blur-bg));
+			transition: all 0.2s ease-in-out;
+			pointer-events: all;
+		}
+
+		&::-webkit-slider-thumb
+		{
+			appearance: none;
+			-webkit-appearance: none;
+			width: 10px;
+			height: 10px;
+			border-radius: 0 100px 100px 0;
+			background: rgba(255, 255, 255, 0.75);
+			box-shadow: -157px 0 0 150px rgba(255, 255, 255, 0.75);
+			cursor: pointer;
+			transition: all 0.2s ease-in-out;
+		}
+
+		&:disabled
+		{
+			background: rgba(255, 255, 255, 0.05);
+			pointer-events: none;
+		}
+	}
+
+	.thumb
+	{
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 14px;
+		height: 14px;
+		transform: translate(-50%, -2px);
+		border-radius: 100px;
+		background: rgba(255, 255, 255, 0.75);
+		backdrop-filter: blur(var(--blur-bg));
+		box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 0.25);
+		cursor: pointer;
+		z-index: 1;
+		transition: all 0.2s ease-in-out, left 0s;
+		will-change: transform;
+	}
+
+	&:hover
+	{
+		.slider::-webkit-slider-runnable-track { background: rgba(255, 255, 255, 0.5); }
+
+		.slider::-webkit-slider-thumb
+		{
+			background: rgba(255, 255, 255, 0.9);
+			box-shadow: -157px 0 0 150px rgba(255, 255, 255, 0.9);
+		}
+
+		.thumb
+		{
+			transform: translate(-50%, -2px) scale(1.14);
+			background: rgba(255, 255, 255, 0.9);
+			box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 1);
+		}
+	}
+}
+
+/* .secondaryButton
+{
+	background: rgba(255, 255, 255, 0.1);
+	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+	color: rgba(255, 255, 255, 0.75);
+	fill: rgba(255, 255, 255, 0.75);
+
+	&:hover
+	{
+		background: rgba(255, 255, 255, 0.35);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.35);
+		color: rgba(255, 255, 255, 0.9);
+		fill: rgba(255, 255, 255, 0.9);
+	}
+
+	&:active
+	{
+		background: rgba(255, 255, 255, 0.05);
+		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+		color: rgba(255, 255, 255, 0.35);
+		fill: rgba(255, 255, 255, 0.35);
+	}
+} */

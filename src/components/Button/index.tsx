@@ -20,7 +20,7 @@ interface Props
 
 export function Button(props: Props)
 {
-	const onClick = () => props.onClick?.();
+	const onClick = (e: React.MouseEvent<HTMLElement>) => props.onClick?.(e);
 	var dynamicClassNames: string[] = [];
 
 	switch (props.type)

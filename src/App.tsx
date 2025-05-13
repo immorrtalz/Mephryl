@@ -7,16 +7,11 @@ import { InitMagick, ConvertImage } from './scripts/ImageMagickManager';
 import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
 
-const supportedInputExtensions = ['.avif', '.bmp', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp'];
-const supportedConvertFormats = ['avif', 'bmp', 'gif', 'jpeg', 'png', 'tiff', 'webp'];
+const supportedInputExtensions = ['.avif', '.bmp', '.dng', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp'];
+const supportedOutputFormats = ['avif', 'bmp', 'gif', 'jpeg', 'png', 'tiff', 'webp'];
 
-const getAvailableConvertFormats = (file: File) : string[] =>
-	supportedConvertFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tif', 'tiff').replace('tifff', 'tiff'));
-
-class ConvertImageSettings
-{
-	quality?: number;
-}
+const getAvailableOutputFormats = (file: File) : string[] =>
+	supportedOutputFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tif', 'tiff').replace('tifff', 'tiff'));
 
 export default function App()
 {
@@ -33,7 +28,7 @@ export default function App()
 	var mainDescription: HTMLElement | null;
 	var imageInput: HTMLInputElement | null;
 
-	function convertImageFile(index : number) : Promise<Blob | null>
+	function convertImage(index : number) : Promise<Blob | null>
 	{
 		return new Promise<Blob | null>((resolve, reject) =>
 		{
@@ -44,15 +39,13 @@ export default function App()
 				if (!e.target) return reject('File read error');
 				const result = e.target.result as string; //base64 string
 
-				const inputFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].inputFormat);
-				var outputFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].outputFormat);
+				const inputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].inputFormat);
+				var outputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].outputFormat);
 
-				if (!inputFormat) return reject('Unsupported input image format');
-				if (!outputFormat) return reject('Unsupported output image format');
+				if (!inputMagickFormat) return reject('Unsupported input image format');
+				if (!outputMagickFormat) return reject('Unsupported output image format');
 
-				//TODO: settings - set quality for lossy formats
-
-				const blob = ConvertImage(Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputFormat, `image/${imageItems[index].outputFormat}`);
+				const blob = ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
 				return blob ? resolve(blob) : resolve(null);
 			};
 
@@ -68,7 +61,7 @@ export default function App()
 
 		for (var i = 0; i < imageItems.length; i++)
 		{
-			const convertedBlob = await convertImageFile(i);
+			const convertedBlob = await convertImage(i);
 			convertedBlob ? imageItems[i].blob = convertedBlob : console.error(`Error converting image ${imageItems[i].file.name}`); //TODO: make error popup dialog window
 		}
 
@@ -137,7 +130,7 @@ export default function App()
 		if (e.dataTransfer.items) setImageItemsWithFiles(Array.from(e.dataTransfer.files));
 	}
 
-	const setImageItemsWithFiles = (files: File[]) => setImageItems(current => [...current, ...files.map(file => new ImageItemInfo(file, null, getAvailableConvertFormats(file)[0]))]);
+	const setImageItemsWithFiles = (files: File[]) => setImageItems(current => [...current, ...files.map(file => new ImageItemInfo(file, null, getAvailableOutputFormats(file)[0]))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(current => current.filter(imageItem => imageItem.file !== file));
 
 	function formatToMagickFormat(format: string) : MagickFormat | null
@@ -147,6 +140,7 @@ export default function App()
 			case 'apng': return MagickFormat.APng;
 			case 'avif': return MagickFormat.Avif;
 			case 'bmp': return MagickFormat.Bmp;
+			case 'dng': return MagickFormat.Dng;
 			case 'gif': return MagickFormat.Gif;
 			case 'heic': return MagickFormat.Heic;
 			case 'heif': return MagickFormat.Heif;
@@ -202,8 +196,9 @@ export default function App()
 								key={index}
 								imageItem={imageItem}
 								phaseIndex={phaseIndex}
-								supportedConvertFormats={getAvailableConvertFormats(imageItem.file)}
-								onChangeConvertFormat={(outputFormat: string) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
+								supportedConvertFormats={getAvailableOutputFormats(imageItem.file)}
+								onChangeOutputFormat={(outputFormat: string) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
+								onChangeOutputQuality={(outputQuality: number) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputQuality: outputQuality } : item))}
 								onDownload={() => downloadConvertedImage(index)}
 								onRemove={onRemoveUploadedImageFile}/>)
 					}

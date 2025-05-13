@@ -47,7 +47,7 @@ export function Dropdown(props: Props)
 	useEffect(() => { if (props.onOptionClick) props.onOptionClick(props.options[currentOptionIndex].value); }, [currentOptionIndex]);
 
 	return (
-		<div className={`${styles.dropdown} dropdown fontMedium`} onClick={onClick}>
+		<div className={`${styles.dropdown} fontMedium`} onClick={onClick}>
 			<p>{props.options[currentOptionIndex].title}</p>
 			<ArrowDownSVG/>
 			<div className={styles.options}>

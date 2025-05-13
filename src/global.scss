@@ -78,10 +78,8 @@ html
 	min-width: 100svw;
 	min-height: 100svh;
 	scroll-behavior: smooth;
-	overflow: clip;
-	overflow: clip scroll;
+	overflow: clip auto;
 	pointer-events: all;
-	scrollbar-gutter: stable;
 
 	&::-webkit-scrollbar { width: 7px; }
 	&::-webkit-scrollbar-track { background: var(--clr-dark); }
@@ -114,8 +112,8 @@ body
 		--temp5: color-mix(in srgb, var(--clr-accent) 1%, var(--clr-dark)) 95%;
 
 		background:
-			radial-gradient(55vw 55vw at 75vw -50vh, var(--clr-accent), var(--temp1), var(--temp2), var(--temp3), var(--temp4), var(--temp5), var(--clr-dark)) no-repeat,
-			radial-gradient(55vw 55vw at 25vw 160vh, var(--clr-accent), var(--temp1), var(--temp2), var(--temp3), var(--temp4), var(--temp5), var(--clr-dark)) no-repeat;
+			radial-gradient(max(55vw, 85vh) max(55vw, 85vh) at 75vw -50vh, var(--clr-accent), var(--temp1), var(--temp2), var(--temp3), var(--temp4), var(--temp5), var(--clr-dark)) no-repeat,
+			radial-gradient(max(55vw, 85vh) max(55vw, 85vh) at 25vw 160vh, var(--clr-accent), var(--temp1), var(--temp2), var(--temp3), var(--temp4), var(--temp5), var(--clr-dark)) no-repeat;
 		background-blend-mode: lighten;
 	}
 }
