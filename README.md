@@ -10,7 +10,7 @@ Simple image converter with modern design
 
 ---
 
-Open source, lightweight, fast and available in web
+Open source, works 100% locally and available in web
 
 > [!TIP]
 > Use the latest release: https://evermedia.immorrtalz.com/mephryl

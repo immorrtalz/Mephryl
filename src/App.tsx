@@ -1,34 +1,39 @@
 import styles from './App.module.scss';
+import { useEffect, useState, useRef } from 'react';
+import { motion, AnimatePresence } from "motion/react";
 import { Button, ButtonType } from './components/Button';
 import { ConvertSVG, DownloadSVG, LogoTextSVG, SettingsSVG, UploadSVG } from './components/SVGLibrary';
-import { useEffect, useState } from 'react';
 import { MagickFormat } from '@imagemagick/magick-wasm';
 import { InitMagick, ConvertImage } from './scripts/ImageMagickManager';
 import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
-
-const supportedInputExtensions = ['.avif', '.bmp', '.dng', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp'];
-const supportedOutputFormats = ['avif', 'bmp', 'gif', 'jpeg', 'png', 'tiff', 'webp'];
+import { ModalWindow } from './components/ModalWindow';
+import { Slider } from './components/Slider';
+import { supportedInputExtensions, supportedOutputFormats } from './scripts/FormatsTools';
 
 const getAvailableOutputFormats = (file: File) : string[] =>
-	supportedOutputFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tif', 'tiff').replace('tifff', 'tiff'));
+	supportedOutputFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tiff', 'tif').replace('tif', 'tiff'));
 
 export default function App()
 {
-	const [imageItems, setImageItems] = useState<ImageItemInfo[]>([]);
 	/*
 	0 - default, 0 uploaded, can upload
 	1 - at least 1 uploaded, can upload
 	2 - converting, can't do anything
 	3 - convert finished, can download */
 	const [phaseIndex, setPhaseIndex] = useState(0);
+	const [error, setError] = useState("");
 
-	var mainElement: HTMLElement | null;
-	var mainTitle: HTMLElement | null;
-	var mainDescription: HTMLElement | null;
-	var imageInput: HTMLInputElement | null;
+	const [imageItems, setImageItems] = useState<ImageItemInfo[]>([]);
 
-	function convertImage(index : number) : Promise<Blob | null>
+	const [isQualityModalOpened, setQualityModalOpened] = useState(false);
+	const [qualityModalTargetIndex, setQualityModalTargetIndex] = useState(-1);
+	const [qualityValue, setQualityValue] = useState(100);
+
+	const imageInput = useRef<HTMLInputElement>(null);
+	const [isImageFilesDraggingOver, setIsImageFilesDraggingOver] = useState(false);
+
+	const convertImage = (index : number) : Promise<Blob | null> =>
 	{
 		return new Promise<Blob | null>((resolve, reject) =>
 		{
@@ -36,14 +41,28 @@ export default function App()
 
 			reader.onload = (e) =>
 			{
-				if (!e.target) return reject('File read error');
+				if (!e.target)
+				{
+					setError('File read error');
+					return reject('File read error');
+				}
+
 				const result = e.target.result as string; //base64 string
 
 				const inputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].inputFormat);
 				var outputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].outputFormat);
 
-				if (!inputMagickFormat) return reject('Unsupported input image format');
-				if (!outputMagickFormat) return reject('Unsupported output image format');
+				if (!inputMagickFormat)
+				{
+					setError('Unsupported input image format');
+					return reject('Unsupported input image format');
+				}
+
+				if (!outputMagickFormat)
+				{
+					setError('Unsupported output image format');
+					return reject('Unsupported output image format');
+				}
 
 				const blob = ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
 				return blob ? resolve(blob) : resolve(null);
@@ -51,26 +70,22 @@ export default function App()
 
 			reader.readAsDataURL(imageItems[index].file);
 		});
-	}
+	};
 
 	async function convertAllImages()
 	{
 		setPhaseIndex(2);
-		if (mainTitle) mainTitle.innerText = 'Converting...';
-		if (mainDescription) mainDescription.innerHTML = `It&nbsp;shouldn't take&nbsp;long`;
 
 		for (var i = 0; i < imageItems.length; i++)
 		{
 			const convertedBlob = await convertImage(i);
-			convertedBlob ? imageItems[i].blob = convertedBlob : console.error(`Error converting image ${imageItems[i].file.name}`); //TODO: make error popup dialog window
+			convertedBlob ? imageItems[i].blob = convertedBlob : setError(`Error converting image ${imageItems[i].file.name}`);
 		}
 
 		setPhaseIndex(3);
-		if (mainTitle) mainTitle.innerHTML = 'Your&nbsp;images are&nbsp;ready!';
-		if (mainDescription) mainDescription.innerHTML = `Save&nbsp;them&nbsp;– they’ll&nbsp;be&nbsp;lost when&nbsp;you&nbsp;close&nbsp;the&nbsp;page`;
-	};
+	}
 
-	function downloadConvertedImage(index: number)
+	const saveConvertedImage = (index: number) =>
 	{
 		if (imageItems[index].blob)
 		{
@@ -85,81 +100,88 @@ export default function App()
 
 			URL.revokeObjectURL(url);
 		}
-		else console.error(`Error downloading image ${imageItems[index].name}.${imageItems[index].outputFormat}`);
-	}
-
-	function downloadAllConvertedImages()
-	{
-		for (var i = 0; i < imageItems.length; i++) downloadConvertedImage(i);
-	}
-
-	useEffect(() =>
-	{
-		mainElement = document.querySelector('main');
-		mainTitle = document.querySelector(`.${styles.mainTitle}`);
-		mainDescription = document.querySelector(`.${styles.mainDescription}`);
-		imageInput = document.getElementById('imageInput') as HTMLInputElement;
-	});
-
-	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
-
-	function onImageInputChange()
-	{
-		if (!imageInput?.files) return;
-		setImageItemsWithFiles(Array.from(imageInput.files));
-		imageInput.files = null;
+		else setError(`Error downloading image ${imageItems[index].name}.${imageItems[index].outputFormat}`);
 	};
 
-	const selectImageFiles = () => imageInput?.click();
+	const saveAllConvertedImages = () =>
+	{
+		for (var i = 0; i < imageItems.length; i++) saveConvertedImage(i);
+	};
 
-	function handleImageFilesDragOver(e: React.DragEvent<any>)
+	const onImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+	{
+		if (!e.target.files) return;
+		setImageItemsWithFiles(Array.from(e.target.files));
+		e.target.files = null;
+	};
+
+	const selectImageFiles = () => imageInput.current?.click();
+
+	const handleImageFilesDragOver = (e: React.DragEvent<any>) =>
 	{
 		e.preventDefault();
-		mainElement?.classList.add(styles.mainOnDragOver);
-	}
+		if (e.dataTransfer.items && e.dataTransfer.files.length > 0) setIsImageFilesDraggingOver(true);
+	};
 
-	function handleImageFilesDragEnd(e: React.DragEvent<any>)
+	const handleImageFilesDragEnd = (e: React.DragEvent<any>) =>
 	{
 		e.preventDefault();
-		mainElement?.classList.remove(styles.mainOnDragOver);
-	}
+		setIsImageFilesDraggingOver(false);
+	};
 
-	function handleDroppedImageFiles(e: React.DragEvent<any>)
+	const handleDroppedImageFiles = (e: React.DragEvent<any>) =>
 	{
 		handleImageFilesDragEnd(e);
 		if (e.dataTransfer.items) setImageItemsWithFiles(Array.from(e.dataTransfer.files));
-	}
+	};
 
-	const setImageItemsWithFiles = (files: File[]) => setImageItems(current => [...current, ...files.map(file => new ImageItemInfo(file, null, getAvailableOutputFormats(file)[0]))]);
-	const onRemoveUploadedImageFile = (file: File) => setImageItems(current => current.filter(imageItem => imageItem.file !== file));
+	const setImageItemsWithFiles = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, getAvailableOutputFormats(file)[0]))]);
+	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
-	function formatToMagickFormat(format: string) : MagickFormat | null
+	const formatToMagickFormat = (format: string) : MagickFormat | null =>
 	{
-		switch (format)
+		const formatMap: Record<string, MagickFormat> =
 		{
-			case 'apng': return MagickFormat.APng;
-			case 'avif': return MagickFormat.Avif;
-			case 'bmp': return MagickFormat.Bmp;
-			case 'dng': return MagickFormat.Dng;
-			case 'gif': return MagickFormat.Gif;
-			case 'heic': return MagickFormat.Heic;
-			case 'heif': return MagickFormat.Heif;
-			case 'jpg': return MagickFormat.Jpeg;
-			case 'jpeg': return MagickFormat.Jpeg;
-			case 'png': return MagickFormat.Png;
-			case 'tif': return MagickFormat.Tiff;
-			case 'tiff': return MagickFormat.Tiff;
-			case 'webp': return MagickFormat.WebP;
-			default: return null;
-		}
-	}
+			'apng': MagickFormat.APng, 'avif': MagickFormat.Avif, 'bmp': MagickFormat.Bmp, 'dng': MagickFormat.Dng,
+			'gif': MagickFormat.Gif, 'heic': MagickFormat.Heic, 'heif': MagickFormat.Heif, 'jpg': MagickFormat.Jpeg, 'jpeg': MagickFormat.Jpeg,
+			'png': MagickFormat.Png, 'tif': MagickFormat.Tiff, 'tiff': MagickFormat.Tiff, 'webp': MagickFormat.WebP
+		};
+		return formatMap[format] || null;
+	};
+
+	const openQualityModal = (targetIndex: number) =>
+	{
+		setQualityModalTargetIndex(targetIndex);
+		setQualityValue(targetIndex == -1 ? 100 : imageItems[targetIndex].outputQuality);
+		setQualityModalOpened(true);
+	};
+
+	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
 
 	InitMagick().then(() => console.log('ImageMagick initialized'));
 
 	return (
 		<div className={styles.pageContainer}>
 
-			<input id='imageInput' onChange={onImageInputChange} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
+			<input id='imageInput' ref={imageInput} onChange={onImageInputChange} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
+
+			<ModalWindow open={isQualityModalOpened}
+				title='Conversion settings'
+				okTitle={qualityModalTargetIndex == -1 ? 'Apply to all' : 'Apply'}
+				onCancel={() => setQualityModalOpened(false)}
+				onOK={() =>
+				{
+					setImageItems(prev => prev.map((item, i) => qualityModalTargetIndex == -1 || i === qualityModalTargetIndex ? { ...item, outputQuality: qualityValue } : item));
+					setQualityModalOpened(false);
+				}}>
+				<div className='modalContentElement'>
+					<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
+					<Slider min={1} max={100} step={1} defaultValue={100} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
+					<p style={{width: '28px'}}>{qualityValue}</p>
+				</div>
+			</ModalWindow>
+
+			<ModalWindow open={!!error} title='Error' okTitle='Reload the page' isOneButton onOK={() => window.location.reload()}><p>{error}</p></ModalWindow>
 
 			<header>
 				<div className={styles.logo}>
@@ -174,9 +196,23 @@ export default function App()
 				</a>
 			</header>
 
-			<main {...(phaseIndex <= 1 ? { className: styles.uploadPhase, onDrop: handleDroppedImageFiles, onDragOver: handleImageFilesDragOver, onDragLeave: handleImageFilesDragEnd } : {})}>
-				<h1 className={`${styles.mainTitle} fontSemibold`}>Convert&nbsp;images for&nbsp;free</h1>
-				<p className={`${styles.mainDescription} colorWhite50 font20`}>Supported formats are: PNG, JPG, GIF, WEBP and more</p>
+			<main className={`${phaseIndex <= 1 ? styles.uploadPhase : ''} ${isImageFilesDraggingOver ? styles.mainOnDragOver : ''}`}
+				{...(phaseIndex <= 1 ? { onDrop: handleDroppedImageFiles, onDragOver: handleImageFilesDragOver, onDragLeave: handleImageFilesDragEnd } : {})}>
+				<h1 className={`${styles.mainTitle} fontSemibold`}>
+					{
+						phaseIndex <= 1 ? <>Convert&nbsp;images for&nbsp;free</> :
+						phaseIndex == 2 ? 'Converting...' :
+						<>Your&nbsp;images are&nbsp;ready!</>
+					}
+				</h1>
+
+				<p className={`${styles.mainDescription} colorWhite50 font20`}>
+					{
+						phaseIndex <= 1 ? 'Supported formats are: PNG, JPG, GIF, WEBP and more' :
+						phaseIndex == 2 ? <>It&nbsp;shouldn't take&nbsp;long</> :
+						<>Save&nbsp;them&nbsp;– they'll&nbsp;be&nbsp;lost when&nbsp;you&nbsp;close&nbsp;the&nbsp;page</>
+					}
+				</p>
 
 				<div className={`${styles.buttonsContainer1} ${phaseIndex > 0 ? 'displayNone' : ''}`}>
 					<Button
@@ -197,9 +233,9 @@ export default function App()
 								imageItem={imageItem}
 								phaseIndex={phaseIndex}
 								supportedConvertFormats={getAvailableOutputFormats(imageItem.file)}
+								onOpenSettings={() => openQualityModal(index)}
 								onChangeOutputFormat={(outputFormat: string) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
-								onChangeOutputQuality={(outputQuality: number) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputQuality: outputQuality } : item))}
-								onDownload={() => downloadConvertedImage(index)}
+								onDownload={() => saveConvertedImage(index)}
 								onRemove={onRemoveUploadedImageFile}/>)
 					}
 				</div>
@@ -221,7 +257,8 @@ export default function App()
 					<Button
 						type={ButtonType.Secondary}
 						square
-						svg={<SettingsSVG/>}/>
+						svg={<SettingsSVG/>}
+						onClick={() => openQualityModal(-1)}/>
 
 					<Button
 						title='Convert all'
@@ -237,18 +274,18 @@ export default function App()
 						onClick={() => window.location.reload()}/>
 
 					<Button
-						title='Download all'
+						title='Save all'
 						svg={<DownloadSVG/>}
-						onClick={downloadAllConvertedImages}/>
+						onClick={saveAllConvertedImages}/>
 				</div>
 
-				<p className={`${styles.toolLimitsText} colorWhite50 font14 ${phaseIndex > 0 ? 'displayNone' : ''}`}>This tool uses your hardware, so – good privacy and no artificial restrictions.
-This is why it's completely free.</p>
+				<p className={`${styles.toolLimitsText} colorWhite50 font14 ${phaseIndex > 0 ? 'displayNone' : ''}`}>This tool uses your hardware as it runs on the client.
+That's why it's free.</p>
 			</main>
 
 			<footer>
 				<p className={`${styles.footerItem} font14`}>© {new Date().getFullYear()}, EVERMEDIA PROJECT</p>
-				<p className={`${styles.footerItem} font14`}>Made with 💜</p>
+				<p className={`${styles.footerItem} font14`}>Made with 💙</p>
 				<a className={`${styles.footerItem} font14`}
 					href='https://github.com/immorrtalz/mephryl'
 					target='_blank'>

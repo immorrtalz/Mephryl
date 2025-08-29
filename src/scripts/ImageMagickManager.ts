@@ -21,6 +21,6 @@ export function ConvertImage(imageItem: ImageItemInfo, bytes: Uint8Array<ArrayBu
 	return new Promise<Blob | null>((resolve) => ImageMagick.read(bytes, image =>
 	{
 		image.quality = imageItem.outputQuality;
-		image.write(outputMagickFormat, data => resolve(new Blob([data], { type: `image/${imageItem.outputFormat}` })));
+		image.write(outputMagickFormat, data => resolve(new Blob([new Uint8Array(data)], { type: `image/${imageItem.outputFormat}` })));
 	}));
 }

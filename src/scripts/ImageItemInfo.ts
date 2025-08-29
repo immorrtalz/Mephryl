@@ -1,5 +1,3 @@
-import { IsFormatLossy } from './IsFormatLossy';
-
 export class ImageItemInfo
 {
 	file: File;
@@ -16,6 +14,6 @@ export class ImageItemInfo
 		this.name = file.name.split('.').slice(0, -1).join('.');
 		this.inputFormat = file.type.split('/')[1].toLowerCase();
 		this.outputFormat = outputFormat;
-		this.outputQuality = IsFormatLossy(outputFormat) ? 97 : 100;
+		this.outputQuality = 100;
 	}
 }

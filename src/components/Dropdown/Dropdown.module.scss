@@ -115,6 +115,7 @@
 		gap: 2px;
 		overflow: clip;
 		animation: dropdown-open-scrollbar 0.2s ease-in-out;
+		transition: all 0.2s, height 0.5s cubic-bezier(0, 0.5, 0, 1);
 
 		@keyframes dropdown-open-scrollbar
 		{
