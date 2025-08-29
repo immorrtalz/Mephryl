@@ -1,5 +1,5 @@
 import { Button, ButtonType } from '../Button';
-import { CancelSVG, CheckmarkSVG } from '../SVGLibrary';
+import { SVG } from '../SVGLibrary';
 import styles from './ModalWindow.module.scss';
 
 interface Props
@@ -33,13 +33,13 @@ export function ModalWindow(props: Props)
 							<Button
 								type={ButtonType.Secondary}
 								title={props.cancelTitle ? props.cancelTitle : 'Cancel'}
-								svg={<CancelSVG/>}
+								svg={<SVG name='cancel'/>}
 								onClick={onCancel}/>
 					}
 
 					<Button
 						title={props.okTitle ? props.okTitle : 'OK'}
-						svg={<CheckmarkSVG/>}
+						svg={<SVG name='checkmark'/>}
 						onClick={onOK}/>
 				</div>
 			</div>

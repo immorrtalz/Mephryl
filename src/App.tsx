@@ -2,17 +2,14 @@ import styles from './App.module.scss';
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from "motion/react";
 import { Button, ButtonType } from './components/Button';
-import { ConvertSVG, DownloadSVG, LogoTextSVG, SettingsSVG, UploadSVG } from './components/SVGLibrary';
+import { SVG } from './components/SVGLibrary';
 import { MagickFormat } from '@imagemagick/magick-wasm';
 import { InitMagick, ConvertImage } from './scripts/ImageMagickManager';
 import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
 import { ModalWindow } from './components/ModalWindow';
 import { Slider } from './components/Slider';
-import { supportedInputExtensions, supportedOutputFormats } from './scripts/FormatsTools';
-
-const getAvailableOutputFormats = (file: File) : string[] =>
-	supportedOutputFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tiff', 'tif').replace('tif', 'tiff'));
+import { supportedInputExtensions, GetAvailableOutputFormats, FormatToMagickFormat } from './scripts/FormatsTools';
 
 export default function App()
 {
@@ -49,8 +46,8 @@ export default function App()
 
 				const result = e.target.result as string; //base64 string
 
-				const inputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].inputFormat);
-				var outputMagickFormat: MagickFormat | null = formatToMagickFormat(imageItems[index].outputFormat);
+				const inputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].inputFormat);
+				var outputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].outputFormat);
 
 				if (!inputMagickFormat)
 				{
@@ -135,19 +132,8 @@ export default function App()
 		if (e.dataTransfer.items) setImageItemsWithFiles(Array.from(e.dataTransfer.files));
 	};
 
-	const setImageItemsWithFiles = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, getAvailableOutputFormats(file)[0]))]);
+	const setImageItemsWithFiles = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, GetAvailableOutputFormats(file)[0]))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
-
-	const formatToMagickFormat = (format: string) : MagickFormat | null =>
-	{
-		const formatMap: Record<string, MagickFormat> =
-		{
-			'apng': MagickFormat.APng, 'avif': MagickFormat.Avif, 'bmp': MagickFormat.Bmp, 'dng': MagickFormat.Dng,
-			'gif': MagickFormat.Gif, 'heic': MagickFormat.Heic, 'heif': MagickFormat.Heif, 'jpg': MagickFormat.Jpeg, 'jpeg': MagickFormat.Jpeg,
-			'png': MagickFormat.Png, 'tif': MagickFormat.Tiff, 'tiff': MagickFormat.Tiff, 'webp': MagickFormat.WebP
-		};
-		return formatMap[format] || null;
-	};
 
 	const openQualityModal = (targetIndex: number) =>
 	{
@@ -157,7 +143,6 @@ export default function App()
 	};
 
 	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
-
 	InitMagick().then(() => console.log('ImageMagick initialized'));
 
 	return (
@@ -176,7 +161,7 @@ export default function App()
 				}}>
 				<div className='modalContentElement'>
 					<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
-					<Slider min={1} max={100} step={1} defaultValue={100} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
+					<Slider min={1} max={100} step={1} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
 					<p style={{width: '28px'}}>{qualityValue}</p>
 				</div>
 			</ModalWindow>
@@ -186,7 +171,7 @@ export default function App()
 			<header>
 				<div className={styles.logo}>
 					<img className={styles.logoImg} src='./src/assets/logo.png'/>
-					<LogoTextSVG className={styles.logoSVG}/>
+					<SVG name='logoText' className={styles.logoSVG}/>
 				</div>
 
 				<a className={`${styles.linkUnderLogo} colorWhite50 font14 bgBlur`}
@@ -217,7 +202,7 @@ export default function App()
 				<div className={`${styles.buttonsContainer1} ${phaseIndex > 0 ? 'displayNone' : ''}`}>
 					<Button
 						title='Upload'
-						svg={<UploadSVG/>}
+						svg={<SVG name='upload'/>}
 						onClick={selectImageFiles}/>
 
 					{/* <Button
@@ -232,7 +217,7 @@ export default function App()
 								key={index}
 								imageItem={imageItem}
 								phaseIndex={phaseIndex}
-								supportedConvertFormats={getAvailableOutputFormats(imageItem.file)}
+								supportedConvertFormats={GetAvailableOutputFormats(imageItem.file)}
 								onOpenSettings={() => openQualityModal(index)}
 								onChangeOutputFormat={(outputFormat: string) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
 								onDownload={() => saveConvertedImage(index)}
@@ -246,7 +231,7 @@ export default function App()
 					<Button
 						type={ButtonType.Secondary}
 						title='Upload more'
-						svg={<UploadSVG/>}
+						svg={<SVG name='upload'/>}
 						onClick={selectImageFiles}/>
 
 					{/* <Button
@@ -257,12 +242,12 @@ export default function App()
 					<Button
 						type={ButtonType.Secondary}
 						square
-						svg={<SettingsSVG/>}
+						svg={<SVG name='settings'/>}
 						onClick={() => openQualityModal(-1)}/>
 
 					<Button
 						title='Convert all'
-						svg={<ConvertSVG/>}
+						svg={<SVG name='convert'/>}
 						onClick={convertAllImages}/>
 				</div>
 
@@ -270,12 +255,12 @@ export default function App()
 					<Button
 						type={ButtonType.Secondary}
 						title='Convert more'
-						svg={<ConvertSVG/>}
+						svg={<SVG name='convert'/>}
 						onClick={() => window.location.reload()}/>
 
 					<Button
 						title='Save all'
-						svg={<DownloadSVG/>}
+						svg={<SVG name='download'/>}
 						onClick={saveAllConvertedImages}/>
 				</div>
 

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import styles from './ImageItem.module.scss';
 import { Button, ButtonType } from '../Button';
-import { DeleteSVG, DownloadSVG, SettingsSVG } from '../SVGLibrary';
+import { SVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
 import { IsFormatLossy } from '../../scripts/FormatsTools';
@@ -48,7 +48,7 @@ export default function UploadedImageItem(props: Props)
 									<>
 										<Button
 											type={ButtonType.Secondary}
-											svg={<SettingsSVG/>}
+											svg={<SVG name='settings'/>}
 											square
 											onClick={onOpenSettings}/>
 									</>) : <></>
@@ -70,14 +70,14 @@ export default function UploadedImageItem(props: Props)
 
 							<Button
 								type={ButtonType.SecondaryDestructive}
-								svg={<DeleteSVG/>}
+								svg={<SVG name='delete'/>}
 								square
 								onClick={onRemove}/>
 						</>
 					) : props.phaseIndex == 3 ? (
 						<Button
 							type={ButtonType.Secondary}
-							svg={<DownloadSVG/>}
+							svg={<SVG name='download'/>}
 							square
 							onClick={onDownload}/>
 					) : <></>

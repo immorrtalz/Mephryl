@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import styles from './Dropdown.module.scss';
-import { ArrowDownSVG } from '../SVGLibrary';
+import { SVG } from '../SVGLibrary';
 
 class DropdownOption
 {
@@ -49,7 +49,7 @@ export function Dropdown(props: Props)
 	return (
 		<div className={`${styles.dropdown} fontMedium`} onClick={onClick}>
 			<p>{props.options[currentOptionIndex].title}</p>
-			<ArrowDownSVG/>
+			<SVG name='arrowDown'/>
 			<div className={styles.options}>
 				{props.options.map((option, index) => <div key={index} className={`${styles.option} ${index == currentOptionIndex ? styles.current : ''} fontRegular`} onClick={onOptionClick}>{option.title}</div>)}
 			</div>
