@@ -16,8 +16,8 @@ interface Props
 
 export function ModalWindow(props: Props)
 {
-	const onCancel = (e: React.MouseEvent<HTMLElement>) => props.onCancel?.();
-	const onOK = (e: React.MouseEvent<HTMLElement>) => props.onOK?.();
+	const onCancel = (_e: React.MouseEvent<HTMLElement>) => props.onCancel?.();
+	const onOK = (_e: React.MouseEvent<HTMLElement>) => props.onOK?.();
 
 	return (
 		<div className={`${styles.modalWindow} ${props.open ? styles.open : ''}`} onClick={onCancel}>

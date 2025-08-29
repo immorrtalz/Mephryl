@@ -33,7 +33,7 @@ export default function UploadedImageItem(props: Props)
 
 	return (
 		<div className={styles.uploadedImageItem}>
-			<img src={props.imageItem.inputFormat == 'dng' ? './src/assets/imagePreviewPlaceholder.jpg' : window.URL.createObjectURL(props.imageItem.file)} onLoad={e => setImageDimensions(`${(e.target as HTMLImageElement).naturalWidth}x${(e.target as HTMLImageElement).naturalHeight}px`)}/>
+			<img src={props.imageItem.inputFormat == 'dng' ? './imagePreviewPlaceholder.jpg' : window.URL.createObjectURL(props.imageItem.file)} onLoad={e => setImageDimensions(`${(e.target as HTMLImageElement).naturalWidth}x${(e.target as HTMLImageElement).naturalHeight}px`)}/>
 			<div className={styles.textsContainer}>
 				<p className={`${styles.title} fontMedium`}>{props.phaseIndex == 3 ? `${props.imageItem.name}.${props.imageItem.outputFormat}` : props.imageItem.file.name}</p>
 				<p className={`${styles.info} font12`}>{imageDimensions} • {Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>

@@ -1,6 +1,6 @@
 import styles from './App.module.scss';
 import { useEffect, useState, useRef } from 'react';
-import { motion, AnimatePresence } from "motion/react";
+/* import { motion, AnimatePresence } from "motion/react"; */
 import { Button, ButtonType } from './components/Button';
 import { SVG } from './components/SVGLibrary';
 import { MagickFormat } from '@imagemagick/magick-wasm';
@@ -170,7 +170,7 @@ export default function App()
 
 			<header>
 				<div className={styles.logo}>
-					<img className={styles.logoImg} src='./src/assets/logo.png'/>
+					<img className={styles.logoImg} src='./logo.png'/>
 					<SVG name='logoText' className={styles.logoSVG}/>
 				</div>
 
