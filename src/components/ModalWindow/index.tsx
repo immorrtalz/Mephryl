@@ -1,14 +1,16 @@
 import { Button, ButtonType } from '../Button';
 import { SVG } from '../SVGLibrary';
 import styles from './ModalWindow.module.scss';
+import { motion } from "motion/react";
 
 interface Props
 {
-	open: boolean;
 	title: string;
-	isOneButton?: boolean;
+	oneButton?: 0 | 1;
 	cancelTitle?: string;
 	okTitle?: string;
+	cancelSvg?: string;
+	okSvg?: string;
 	children?: React.ReactNode;
 	onCancel?: (...args: any[]) => any;
 	onOK?: (...args: any[]) => any;
@@ -20,8 +22,17 @@ export function ModalWindow(props: Props)
 	const onOK = (_e: React.MouseEvent<HTMLElement>) => props.onOK?.();
 
 	return (
-		<div className={`${styles.modalWindow} ${props.open ? styles.open : ''}`} onClick={onCancel}>
-			<div className={styles.container} onClick={e => e.stopPropagation()}>
+		<motion.div className={styles.modalWindow} onClick={onCancel}
+			initial={{ backgroundColor: "rgba(0, 0, 0, 0)", backdropFilter: "blur(0px)", opacity: 0, pointerEvents: "none", visibility: "hidden" }}
+			animate={{ backgroundColor: "rgba(0, 0, 0, 0.5)", backdropFilter: "blur(calc(var(--blur-bg) * 0.5))", opacity: 1, pointerEvents: "all", visibility: "visible" }}
+			exit={{ backgroundColor: "rgba(0, 0, 0, 0)", backdropFilter: "blur(0px)", opacity: 0, pointerEvents: "none", visibility: "hidden" }}
+			transition={{ duration: 0.2, ease: [0.78, 0, 0.22, 1] }}>
+
+			<motion.div className={styles.container} onClick={e => e.stopPropagation()}
+				initial={{ pointerEvents: "none", height: 50, opacity: 0 }}
+				animate={{ pointerEvents: "all", height: "fit-content", opacity: 1 }}
+				exit={{ pointerEvents: "none", height: 50, opacity: 0 }}
+				transition={{ duration: 0.2, ease: [0.78, 0, 0.22, 1] }}>
 				<h1 className='fontSemibold'>{props.title}</h1>
 					<div className={styles.childrenContainer}>
 						{props.children}
@@ -29,20 +40,33 @@ export function ModalWindow(props: Props)
 
 				<div className={styles.buttons}>
 					{
-						props.isOneButton ? <></> :
+						props.oneButton === 0 ?
 							<Button
 								type={ButtonType.Secondary}
-								title={props.cancelTitle ? props.cancelTitle : 'Cancel'}
-								svg={<SVG name='cancel'/>}
+								title={props.cancelTitle ?? 'Cancel'}
+								svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
+								onClick={onCancel}/> :
+						props.oneButton === 1 ?
+							<Button
+								title={props.okTitle ?? 'OK'}
+								svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
+								onClick={onOK}/> :
+						<>
+							<Button
+								type={ButtonType.Secondary}
+								title={props.cancelTitle ?? 'Cancel'}
+								svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
 								onClick={onCancel}/>
-					}
 
-					<Button
-						title={props.okTitle ? props.okTitle : 'OK'}
-						svg={<SVG name='checkmark'/>}
-						onClick={onOK}/>
+							<Button
+								title={props.okTitle ?? 'OK'}
+								svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
+								onClick={onOK}/>
+						</>
+					}
 				</div>
-			</div>
-		</div>
+
+			</motion.div>
+		</motion.div>
 	);
 }

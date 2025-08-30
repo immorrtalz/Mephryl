@@ -73,8 +73,9 @@ export function SVG(props : Props)
 	};
 
 	return (
-		<svg {...ParamsMap[props.name]} className={props.className} xmlns='http://www.w3.org/2000/svg'>
-			{PathsMap[props.name]}
-		</svg>
+		props.name &&
+			<svg {...ParamsMap[props.name]} className={props.className} xmlns='http://www.w3.org/2000/svg'>
+				{PathsMap[props.name]}
+			</svg>
 	);
 }

@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import styles from './ImageItem.module.scss';
 import { Button, ButtonType } from '../Button';
 import { SVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
 import { IsFormatLossy } from '../../scripts/FormatsTools';
+import { GetImageDimensions } from '../../scripts/ImageMagickManager';
 
 interface Props
 {
@@ -25,7 +26,19 @@ export default function UploadedImageItem(props: Props)
 	const onDownload = () => props.onDownload?.();
 	const onRemove = () => props.imageItem.file ? props.onRemove?.(props.imageItem.file) : undefined;
 
-	const [imageDimensions, setImageDimensions] = useState('Error parsing image dimensions');
+	const [imageDimensions, setImageDimensions] = useState<string | null>('Parsing image dimensions...');
+
+	useEffect(() =>
+	{
+		props.imageItem.file.arrayBuffer().then(arrayBuffer =>
+		{
+			GetImageDimensions(new Uint8Array(arrayBuffer)).then(dimensions =>
+			{
+				if (dimensions) setImageDimensions(`${dimensions.width}x${dimensions.height}px`);
+				else setImageDimensions(null);
+			}).catch(() => setImageDimensions(null));
+		}).catch(() => setImageDimensions(null));
+	}, []);
 
 	const fileSizeUnits = ['Bytes', 'KB', 'MB'];
 	var fileSize = props.phaseIndex == 3 && props.imageItem.blob ? props.imageItem.blob.size : props.imageItem.file.size;
@@ -33,10 +46,9 @@ export default function UploadedImageItem(props: Props)
 
 	return (
 		<div className={styles.uploadedImageItem}>
-			<img src={props.imageItem.inputFormat == 'dng' ? './imagePreviewPlaceholder.jpg' : window.URL.createObjectURL(props.imageItem.file)} onLoad={e => setImageDimensions(`${(e.target as HTMLImageElement).naturalWidth}x${(e.target as HTMLImageElement).naturalHeight}px`)}/>
 			<div className={styles.textsContainer}>
 				<p className={`${styles.title} fontMedium`}>{props.phaseIndex == 3 ? `${props.imageItem.name}.${props.imageItem.outputFormat}` : props.imageItem.file.name}</p>
-				<p className={`${styles.info} font12`}>{imageDimensions} • {Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>
+				<p className={`${styles.info} font12`}>{imageDimensions ?? 'Unknown image dimensions'} • {Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>
 			</div>
 
 			<div className={styles.buttonsContainer}>

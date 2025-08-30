@@ -7,9 +7,9 @@ export const GetAvailableOutputFormats = (file: File) : string[] =>
 	supportedOutputFormats.filter(format => format !== file.type.split('/')[1]).map(format => format.replace('jpg', 'jpeg').replace('tiff', 'tif').replace('tif', 'tiff'));
 
 const lossyFormats = ['avif', 'dng', 'jpeg', 'webp'];
-export const IsFormatLossy = (format: string) : boolean => lossyFormats.includes(format);
+export const IsFormatLossy = (format: string): boolean => lossyFormats.includes(format);
 
-export const FormatToMagickFormat = (format: string) : MagickFormat | null =>
+export const FormatToMagickFormat = (format: string): MagickFormat | null =>
 {
 	const formatMap: Record<string, MagickFormat> =
 	{

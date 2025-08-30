@@ -1,6 +1,6 @@
 import styles from './App.module.scss';
 import { useEffect, useState, useRef } from 'react';
-/* import { motion, AnimatePresence } from "motion/react"; */
+import { AnimatePresence } from "motion/react";
 import { Button, ButtonType } from './components/Button';
 import { SVG } from './components/SVGLibrary';
 import { MagickFormat } from '@imagemagick/magick-wasm';
@@ -143,30 +143,34 @@ export default function App()
 	};
 
 	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
-	InitMagick().then(() => console.log('ImageMagick initialized'));
+	useEffect(() => { InitMagick().then(() => console.log('ImageMagick initialized')) }, []);
 
 	return (
 		<div className={styles.pageContainer}>
 
 			<input id='imageInput' ref={imageInput} onChange={onImageInputChange} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
 
-			<ModalWindow open={isQualityModalOpened}
-				title='Conversion settings'
-				okTitle={qualityModalTargetIndex == -1 ? 'Apply to all' : 'Apply'}
-				onCancel={() => setQualityModalOpened(false)}
-				onOK={() =>
+			<AnimatePresence>
 				{
-					setImageItems(prev => prev.map((item, i) => qualityModalTargetIndex == -1 || i === qualityModalTargetIndex ? { ...item, outputQuality: qualityValue } : item));
-					setQualityModalOpened(false);
-				}}>
-				<div className='modalContentElement'>
-					<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
-					<Slider min={1} max={100} step={1} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
-					<p style={{width: '28px'}}>{qualityValue}</p>
-				</div>
-			</ModalWindow>
+					isQualityModalOpened && <ModalWindow
+						title='Conversion settings'
+						okTitle={qualityModalTargetIndex == -1 ? 'Apply to all' : 'Apply'}
+						onCancel={() => setQualityModalOpened(false)}
+						onOK={() =>
+						{
+							setImageItems(prev => prev.map((item, i) => qualityModalTargetIndex == -1 || i === qualityModalTargetIndex ? { ...item, outputQuality: qualityValue } : item));
+							setQualityModalOpened(false);
+						}}>
+						<div className='modalContentElement'>
+							<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
+							<Slider min={1} max={100} step={1} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
+							<p style={{width: '28px'}}>{qualityValue}</p>
+						</div>
+					</ModalWindow>
+				}
 
-			<ModalWindow open={!!error} title='Error' okTitle='Reload the page' isOneButton onOK={() => window.location.reload()}><p>{error}</p></ModalWindow>
+				{ !!error && <ModalWindow title='Error' cancelTitle='Reload the page' cancelSvg='' oneButton={0} onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
+			</AnimatePresence>
 
 			<header>
 				<div className={styles.logo}>
