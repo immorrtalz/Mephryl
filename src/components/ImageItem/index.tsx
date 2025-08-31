@@ -1,11 +1,9 @@
-import { useEffect, useState } from 'react';
 import styles from './ImageItem.module.scss';
 import { Button, ButtonType } from '../Button';
 import { SVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
 import { IsFormatLossy } from '../../scripts/FormatsTools';
-import { GetImageDimensions } from '../../scripts/ImageMagickManager';
 
 interface Props
 {
@@ -26,20 +24,6 @@ export default function UploadedImageItem(props: Props)
 	const onDownload = () => props.onDownload?.();
 	const onRemove = () => props.imageItem.file ? props.onRemove?.(props.imageItem.file) : undefined;
 
-	const [imageDimensions, setImageDimensions] = useState<string | null>('Parsing image dimensions...');
-
-	useEffect(() =>
-	{
-		props.imageItem.file.arrayBuffer().then(arrayBuffer =>
-		{
-			GetImageDimensions(new Uint8Array(arrayBuffer)).then(dimensions =>
-			{
-				if (dimensions) setImageDimensions(`${dimensions.width}x${dimensions.height}px`);
-				else setImageDimensions(null);
-			}).catch(() => setImageDimensions(null));
-		}).catch(() => setImageDimensions(null));
-	}, []);
-
 	const fileSizeUnits = ['Bytes', 'KB', 'MB'];
 	var fileSize = props.phaseIndex == 3 && props.imageItem.blob ? props.imageItem.blob.size : props.imageItem.file.size;
 	for (var fileSizeUnitIndex = 0; fileSizeUnitIndex < fileSizeUnits.length && fileSize >= 1024; fileSizeUnitIndex++) fileSize /= 1024;
@@ -48,7 +32,7 @@ export default function UploadedImageItem(props: Props)
 		<div className={styles.uploadedImageItem}>
 			<div className={styles.textsContainer}>
 				<p className={`${styles.title} fontMedium`}>{props.phaseIndex == 3 ? `${props.imageItem.name}.${props.imageItem.outputFormat}` : props.imageItem.file.name}</p>
-				<p className={`${styles.info} font12`}>{imageDimensions ?? 'Unknown image dimensions'} • {Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>
+				<p className={`${styles.info} font12`}>{Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>
 			</div>
 
 			<div className={styles.buttonsContainer}>
@@ -57,13 +41,11 @@ export default function UploadedImageItem(props: Props)
 						<>
 							{
 								IsFormatLossy(props.imageItem.outputFormat) ? (
-									<>
-										<Button
-											type={ButtonType.Secondary}
-											svg={<SVG name='settings'/>}
-											square
-											onClick={onOpenSettings}/>
-									</>) : <></>
+									<Button
+										type={ButtonType.Secondary}
+										svg={<SVG name='settings'/>}
+										square
+										onClick={onOpenSettings}/>) : <></>
 							}
 
 							{

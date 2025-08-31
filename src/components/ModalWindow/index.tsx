@@ -6,7 +6,7 @@ import { motion } from "motion/react";
 interface Props
 {
 	title: string;
-	oneButton?: 0 | 1;
+	buttons?: 0 | 1 | 2;
 	cancelTitle?: string;
 	okTitle?: string;
 	cancelSvg?: string;
@@ -34,37 +34,39 @@ export function ModalWindow(props: Props)
 				exit={{ pointerEvents: "none", height: 50, opacity: 0 }}
 				transition={{ duration: 0.2, ease: [0.78, 0, 0.22, 1] }}>
 				<h1 className='fontSemibold'>{props.title}</h1>
-					<div className={styles.childrenContainer}>
+					<div className={styles.childrenContainer} style={props.buttons === 0 ? { marginBottom: 0 } : {}}>
 						{props.children}
 					</div>
 
-				<div className={styles.buttons}>
-					{
-						props.oneButton === 0 ?
-							<Button
-								type={ButtonType.Secondary}
-								title={props.cancelTitle ?? 'Cancel'}
-								svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
-								onClick={onCancel}/> :
-						props.oneButton === 1 ?
-							<Button
-								title={props.okTitle ?? 'OK'}
-								svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
-								onClick={onOK}/> :
-						<>
-							<Button
-								type={ButtonType.Secondary}
-								title={props.cancelTitle ?? 'Cancel'}
-								svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
-								onClick={onCancel}/>
+				{
+					props.buttons !== 0 && <div className={styles.buttons}>
+						{
+							props.buttons === 1 ?
+								(props.okTitle ?
+									<Button
+										title={props.okTitle ?? 'OK'}
+										svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
+										onClick={onOK}/> :
+									<Button
+										type={ButtonType.Secondary}
+										title={props.cancelTitle ?? 'Cancel'}
+										svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
+										onClick={onCancel}/>) :
+							<>
+								<Button
+									type={ButtonType.Secondary}
+									title={props.cancelTitle ?? 'Cancel'}
+									svg={<SVG name={props.cancelSvg ?? 'cancel'}/>}
+									onClick={onCancel}/>
 
-							<Button
-								title={props.okTitle ?? 'OK'}
-								svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
-								onClick={onOK}/>
-						</>
-					}
-				</div>
+								<Button
+									title={props.okTitle ?? 'OK'}
+									svg={<SVG name={props.okSvg ?? 'checkmark'}/>}
+									onClick={onOK}/>
+							</>
+						}
+					</div>
+				}
 
 			</motion.div>
 		</motion.div>

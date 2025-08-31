@@ -4,7 +4,7 @@ import { AnimatePresence } from "motion/react";
 import { Button, ButtonType } from './components/Button';
 import { SVG } from './components/SVGLibrary';
 import { MagickFormat } from '@imagemagick/magick-wasm';
-import { InitMagick, ConvertImage } from './scripts/ImageMagickManager';
+import { ImageMagickManager } from './scripts/ImageMagickManager';
 import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
 import { ModalWindow } from './components/ModalWindow';
@@ -13,6 +13,9 @@ import { supportedInputExtensions, GetAvailableOutputFormats, FormatToMagickForm
 
 export default function App()
 {
+	const [imageMagickManager] = useState(new ImageMagickManager());
+	const [isMagickInitialized, setIsMagickInitialized] = useState(false);
+
 	/*
 	0 - default, 0 uploaded, can upload
 	1 - at least 1 uploaded, can upload
@@ -61,7 +64,7 @@ export default function App()
 					return reject('Unsupported output image format');
 				}
 
-				const blob = ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
+				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
 				return blob ? resolve(blob) : resolve(null);
 			};
 
@@ -108,7 +111,7 @@ export default function App()
 	const onImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
 	{
 		if (!e.target.files) return;
-		setImageItemsWithFiles(Array.from(e.target.files));
+		addImageItems(Array.from(e.target.files));
 		e.target.files = null;
 	};
 
@@ -129,10 +132,10 @@ export default function App()
 	const handleDroppedImageFiles = (e: React.DragEvent<any>) =>
 	{
 		handleImageFilesDragEnd(e);
-		if (e.dataTransfer.items) setImageItemsWithFiles(Array.from(e.dataTransfer.files));
+		if (e.dataTransfer.items) addImageItems(Array.from(e.dataTransfer.files));
 	};
 
-	const setImageItemsWithFiles = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, GetAvailableOutputFormats(file)[0]))]);
+	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, GetAvailableOutputFormats(file)[0]))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
 	const openQualityModal = (targetIndex: number) =>
@@ -143,7 +146,17 @@ export default function App()
 	};
 
 	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
-	useEffect(() => { InitMagick().then(() => console.log('ImageMagick initialized')) }, []);
+
+	useEffect(() =>
+	{
+		imageMagickManager.InitMagick()
+			.then(() =>
+			{
+				setIsMagickInitialized(true);
+				console.log('ImageMagick initialized');
+			})
+			.catch(() => setError('Failed to initialize ImageMagick (an underlying library)'));
+	}, []);
 
 	return (
 		<div className={styles.pageContainer}>
@@ -169,7 +182,7 @@ export default function App()
 					</ModalWindow>
 				}
 
-				{ !!error && <ModalWindow title='Error' cancelTitle='Reload the page' cancelSvg='' oneButton={0} onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
+				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
 			</AnimatePresence>
 
 			<header>
@@ -198,7 +211,7 @@ export default function App()
 				<p className={`${styles.mainDescription} colorWhite50 font20`}>
 					{
 						phaseIndex <= 1 ? 'Supported formats are: PNG, JPG, GIF, WEBP and more' :
-						phaseIndex == 2 ? <>It&nbsp;shouldn't take&nbsp;long</> :
+						phaseIndex == 2 ? <>Please&nbsp;wait,&nbsp;this&nbsp;might take&nbsp;a&nbsp;while</> :
 						<>Save&nbsp;them&nbsp;– they'll&nbsp;be&nbsp;lost when&nbsp;you&nbsp;close&nbsp;the&nbsp;page</>
 					}
 				</p>
@@ -207,6 +220,7 @@ export default function App()
 					<Button
 						title='Upload'
 						svg={<SVG name='upload'/>}
+						disabled={!isMagickInitialized}
 						onClick={selectImageFiles}/>
 
 					{/* <Button
@@ -268,15 +282,14 @@ export default function App()
 						onClick={saveAllConvertedImages}/>
 				</div>
 
-				<p className={`${styles.toolLimitsText} colorWhite50 font14 ${phaseIndex > 0 ? 'displayNone' : ''}`}>This tool uses your hardware as it runs on the client.
-That's why it's free.</p>
+				<p className={`${styles.toolLimitsText} colorWhite50 font14 ${phaseIndex > 0 ? 'displayNone' : ''}`}>This tool runs on your device locally, so it's free.</p>
 			</main>
 
 			<footer>
 				<p className={`${styles.footerItem} font14`}>© {new Date().getFullYear()}, EVERMEDIA PROJECT</p>
 				<p className={`${styles.footerItem} font14`}>Made with 💙</p>
 				<a className={`${styles.footerItem} font14`}
-					href='https://github.com/immorrtalz/mephryl'
+					href='https://github.com/immorrtalz/Mephryl'
 					target='_blank'>
 					View on GitHub
 				</a>
