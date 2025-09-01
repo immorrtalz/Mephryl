@@ -10,27 +10,27 @@ export interface ImageDimensions
 export class ImageMagickManager
 {
 	private wasmLocation = './magick.wasm';
-	private isMagickInitialized = false;
 
-	InitMagick(): Promise<void>
+	InitMagick(isMagickInitialized: boolean = false): Promise<boolean>
 	{
-		if (this.isMagickInitialized) return Promise.resolve();
+		if (isMagickInitialized) return Promise.resolve(true);
 
-		return new Promise<void>((resolve, reject) =>
+		return new Promise<boolean>(resolve =>
 		{
 			fetch(this.wasmLocation)
 				.then(response => response.arrayBuffer())
 				.then(arrayBuffer => initializeImageMagick(arrayBuffer))
 				.then(() =>
 				{
-					this.isMagickInitialized = true;
-					resolve();
+					console.log('ImageMagick initialized');
+					resolve(true);
 				})
-				.catch(reject);
+				.catch(() => resolve(false));
 		});
 	}
 
 	GetSupportedFormats = () => Magick.delegates; // heic jng jp2 jpeg jxl openexr png tiff webp raw (everything except raw supports RW, raw supports R)
+	//['.avif', '.bmp', '.dng', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp'];
 
 	ConvertImage(imageItem: ImageItemInfo, bytes: Uint8Array<ArrayBuffer>, outputMagickFormat: MagickFormat) : Promise<Blob | null>
 	{

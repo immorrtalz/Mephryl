@@ -80,11 +80,9 @@ html
 	scroll-behavior: smooth;
 	overflow: clip auto;
 	pointer-events: all;
-
-	&::-webkit-scrollbar { width: 7px; }
-	&::-webkit-scrollbar-track { background: var(--clr-dark); }
-	&::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.35); border-radius: 3.5px; }
-	&::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
+	scrollbar-width: thin;
+	scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+	scrollbar-gutter: stable;
 }
 
 body

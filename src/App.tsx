@@ -147,17 +147,6 @@ export default function App()
 
 	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
 
-	useEffect(() =>
-	{
-		imageMagickManager.InitMagick()
-			.then(() =>
-			{
-				setIsMagickInitialized(true);
-				console.log('ImageMagick initialized');
-			})
-			.catch(() => setError('Failed to initialize ImageMagick (an underlying library)'));
-	}, []);
-
 	return (
 		<div className={styles.pageContainer}>
 
@@ -181,6 +170,18 @@ export default function App()
 						</div>
 					</ModalWindow>
 				}
+
+				{ !isMagickInitialized && <ModalWindow buttons={1} title='Attention required' okTitle='Continue' onOK={() =>
+						{
+							imageMagickManager.InitMagick(isMagickInitialized)
+								.then(result => setIsMagickInitialized(result))
+								.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
+						}
+					}>
+						<p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
+							<br/>
+							By pressing "Continue", you agree to download ~13.6 MB of content.</p>
+					</ModalWindow> }
 
 				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
 			</AnimatePresence>

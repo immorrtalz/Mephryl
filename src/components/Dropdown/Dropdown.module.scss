@@ -4,6 +4,7 @@
 	-webkit-appearance: none;
 	outline: none;
 	border: none;
+	position: relative;
 	width: 110px;
 	height: 50px !important;
 	padding: 0 20px 0 26px;
@@ -18,28 +19,35 @@
 	gap: 10px;
 	flex-shrink: 0;
 	pointer-events: all;
-	cursor: pointer;
+
+	&:not(.open) { cursor: pointer; }
+
+	@media (min-width: 768px)
+	{
+		&:not(.open)
+		{
+			transition: all 0.2s, transform 0.4s linear(0, 0.01 1%, 0.037 2%, 0.084 3.1%, 0.152 4.3%, 0.309 6.5%, 0.773 12.3%, 0.898 14.1%, 0.998 15.8%, 1.079 17.5%, 1.137 19.1%, 1.181 20.8%, 1.208 22.6%, 1.217 24.9%, 1.201 27.5%, 1.167 30.1%, 1.058 36.4%, 1.01 39.6%, 0.975 43.1%, 0.956 46.7%, 0.956 52.1%, 0.997 63.9%, 1.009 70.6%, 1);
+			will-change: transform;
+
+			&:hover
+			{
+				transform: scale(1.05);
+				transition: all 0.2s, transform 0.2s cubic-bezier(0, 0.6, 0.3, 1);
+			}
+
+			&:active
+			{
+				transform: scale(0.6);
+				transition: all 0.2s, transform 2s cubic-bezier(0, 0.6, 0.3, 1);
+			}
+		}
+	}
 
 	& > p
 	{
 		width: fit-content;
 		height: fit-content;
 		color: rgba(255, 255, 255, 0.75);
-	}
-
-	&::before
-	{
-		content: '';
-		position: fixed;
-		top: 0;
-		left: 0;
-		width: 100vw;
-		height: 100vh;
-		background-color: transparent;
-		backdrop-filter: blur(0px);
-		z-index: 10;
-		pointer-events: none;
-		cursor: default;
 	}
 
 	&:disabled
@@ -52,7 +60,7 @@
 		& > p { color: rgba(255, 255, 255, 0.25); }
 	}
 
-	&:hover, &.open
+	&:hover:not(.open)
 	{
 		background-color: rgba(255, 255, 255, 0.35);
 		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.35);
@@ -104,7 +112,7 @@
 		padding: 4px;
 		border-radius: var(--main-border-radius);
 		background-color: rgba(255, 255, 255, 0.1);
-		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
+		box-shadow: 0 0 16px 0 rgba(0, 0, 0, 0.25), 0 8px 64px 0 rgba(0, 0, 0, 0.5);
 		backdrop-filter: blur(var(--blur-bg));
 		opacity: 0;
 		pointer-events: none;
@@ -114,21 +122,23 @@
 		align-items: center;
 		gap: 2px;
 		overflow: clip;
-		animation: dropdown-open-scrollbar 0.2s ease-in-out;
 		transition: all 0.2s, height 0.5s cubic-bezier(0, 0.5, 0, 1);
+
+		@media (min-width: 768px)
+		{
+			animation: dropdown-open-scrollbar 0.2s ease-in-out;
+		}
+
+		@media (max-width: 768px)
+		{
+			transition: all 0.2s, height 0s;
+		}
 
 		@keyframes dropdown-open-scrollbar
 		{
 			99% { overflow: clip; }
 			100% { overflow: clip auto; }
 		}
-
-		&::-webkit-scrollbar { width: 7px; }
-		&::-webkit-scrollbar-track { background: transparent; }
-		&::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.35); border-radius: 3.5px; }
-		&::-webkit-scrollbar-thumb:hover { background: rgba(255, 255, 255, 0.5); }
-		&::-webkit-scrollbar-button:start:increment { height: var(--main-border-radius); }
-		&::-webkit-scrollbar-button:end:increment { height: var(--main-border-radius); }
 
 		& > .option
 		{
@@ -143,15 +153,17 @@
 
 			&.current
 			{
-				background-color: rgba(255, 255, 255, 0.1);
+				background-color: rgba(0, 0, 0, 0.15);
 				color: rgba(255, 255, 255, 0.9);
-				border: 1px solid rgba(255, 255, 255, 0.15);
+				border: 1px solid rgba(255, 255, 255, 0.25);
 			}
 
 			&:hover
 			{
 				background-color: rgba(255, 255, 255, 0.35);
 				color: rgba(255, 255, 255, 0.9);
+
+				&.current { border: 1px solid transparent; }
 			}
 
 			&:active
