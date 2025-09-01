@@ -14,7 +14,7 @@ import { supportedInputExtensions, GetAvailableOutputFormats, FormatToMagickForm
 export default function App()
 {
 	const [imageMagickManager] = useState(new ImageMagickManager());
-	const [isMagickInitialized, setIsMagickInitialized] = useState(false);
+	const [magickState, setMagickState] = useState<'uninitialized' | 'initializing' | 'initialized'>('uninitialized');
 
 	/*
 	0 - default, 0 uploaded, can upload
@@ -171,10 +171,14 @@ export default function App()
 					</ModalWindow>
 				}
 
-				{ !isMagickInitialized && <ModalWindow buttons={1} title='Attention required' okTitle='Continue' onOK={() =>
+				{ magickState !== 'initialized' && <ModalWindow buttons={magickState === 'initializing' ? 0 : 1} title='Attention required' okTitle='Continue' onOK={() =>
 						{
-							imageMagickManager.InitMagick(isMagickInitialized)
-								.then(result => setIsMagickInitialized(result))
+							setMagickState('initializing');
+							imageMagickManager.InitMagick()
+								.then(result =>
+								{
+									setMagickState(result ? 'initialized' : 'uninitialized');
+								})
 								.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
 						}
 					}>
@@ -221,7 +225,7 @@ export default function App()
 					<Button
 						title='Upload'
 						svg={<SVG name='upload'/>}
-						disabled={!isMagickInitialized}
+						disabled={magickState !== 'initialized'}
 						onClick={selectImageFiles}/>
 
 					{/* <Button

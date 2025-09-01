@@ -11,10 +11,8 @@ export class ImageMagickManager
 {
 	private wasmLocation = './magick.wasm';
 
-	InitMagick(isMagickInitialized: boolean = false): Promise<boolean>
+	InitMagick(): Promise<boolean>
 	{
-		if (isMagickInitialized) return Promise.resolve(true);
-
 		return new Promise<boolean>(resolve =>
 		{
 			fetch(this.wasmLocation)
