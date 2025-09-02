@@ -40,12 +40,12 @@ export default function UploadedImageItem(props: Props)
 					props.phaseIndex <= 1 ? (
 						<>
 							{
-								IsFormatLossy(props.imageItem.outputFormat) ? (
-									<Button
-										type={ButtonType.Secondary}
-										svg={<SVG name='settings'/>}
-										square
-										onClick={onOpenSettings}/>) : <></>
+								<Button
+									type={ButtonType.Secondary}
+									svg={<SVG name='settings'/>}
+									square
+									disabled={IsFormatLossy(props.imageItem.outputFormat)}
+									onClick={onOpenSettings}/>
 							}
 
 							{
