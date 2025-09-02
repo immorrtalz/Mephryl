@@ -39,7 +39,7 @@ export default function App()
 		{
 			var reader = new FileReader();
 
-			reader.onload = async (e) =>
+			reader.onload = e =>
 			{
 				if (!e.target)
 				{
@@ -171,22 +171,25 @@ export default function App()
 					</ModalWindow>
 				}
 
-				{ magickState !== 'initialized' && <ModalWindow buttons={magickState === 'initializing' ? 0 : 1} title='Attention required' okTitle='Continue' onOK={() =>
+				{
+					magickState !== 'initialized' && <ModalWindow buttons={magickState === 'initializing' ? 0 : 1}
+						title={magickState === 'uninitialized' ? 'Attention required' : 'Loading...'} okTitle='Continue'
+						onOK={() =>
+							{
+								setMagickState('initializing');
+
+								imageMagickManager.InitMagick()
+									.then(result => setMagickState(result ? 'initialized' : 'uninitialized'))
+									.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
+							}}>
 						{
-							setMagickState('initializing');
-							imageMagickManager.InitMagick()
-								.then(result =>
-								{
-									setMagickState(result ? 'initialized' : 'uninitialized');
-								})
-								.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
-						}
-					}>
-						<p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
+							magickState === 'uninitialized' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
 							<br/>
-							By pressing "Continue", you agree to download ~13.6 MB of content.</p>
-							{ magickState === 'initializing' && <p>Loading...</p> }
-					</ModalWindow> }
+							By pressing "Continue", you agree to download ~13.6 MB of content.</p> :
+							<p>Please wait...</p>
+						}
+					</ModalWindow>
+				}
 
 				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
 			</AnimatePresence>

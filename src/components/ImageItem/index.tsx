@@ -44,7 +44,7 @@ export default function UploadedImageItem(props: Props)
 									type={ButtonType.Secondary}
 									svg={<SVG name='settings'/>}
 									square
-									disabled={IsFormatLossy(props.imageItem.outputFormat)}
+									disabled={!IsFormatLossy(props.imageItem.outputFormat)}
 									onClick={onOpenSettings}/>
 							}
 

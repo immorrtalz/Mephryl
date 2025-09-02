@@ -17,7 +17,7 @@
 	{
 		width: 50px; // any small value
 		height: fit-content;
-		padding-left: 6px;
+		padding-left: 8px;
 		display: flex;
 		flex-direction: column;
 		flex-wrap: nowrap;
@@ -35,7 +35,7 @@
 			text-overflow: ellipsis;
 		}
 
-		.info { color: rgba(255, 255, 255, 0.35); }
+		& .info { color: rgba(255, 255, 255, 0.35); }
 	}
 
 	& .buttonsContainer

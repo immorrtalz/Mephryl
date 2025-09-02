@@ -30,7 +30,7 @@ export class ImageMagickManager
 	GetSupportedFormats = () => Magick.delegates; // heic jng jp2 jpeg jxl openexr png tiff webp raw (everything except raw supports RW, raw supports R)
 	//['.avif', '.bmp', '.dng', '.gif', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp'];
 
-	ConvertImage(imageItem: ImageItemInfo, bytes: Uint8Array<ArrayBuffer>, outputMagickFormat: MagickFormat) : Promise<Blob | null>
+	ConvertImage(imageItem: ImageItemInfo, bytes: Uint8Array<ArrayBuffer>, outputMagickFormat: MagickFormat): Promise<Blob | null>
 	{
 		return new Promise<Blob | null>((resolve) => ImageMagick.read(bytes, image =>
 		{

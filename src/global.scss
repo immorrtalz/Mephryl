@@ -67,7 +67,12 @@
 	interpolate-size: allow-keywords;
 }
 
-*, *::before, *::after, *:not(path):not(g) { transition: all 0.2s; }
+*, *::before, *::after, *:not(path):not(g)
+{
+	transition: all 0.2s;
+
+	@media (prefers-reduced-motion) { transition: all 0s !important; }
+}
 
 h1, h2, h3, h4, h5, h6, p, a { white-space: pre; }
 
