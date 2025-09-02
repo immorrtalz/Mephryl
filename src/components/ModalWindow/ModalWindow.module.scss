@@ -20,6 +20,7 @@
 	.container
 	{
 		width: 600px;
+		max-width: 95vw;
 		height: fit-content;
 		max-height: 50vh;
 		padding: 30px 10px 40px;
@@ -59,6 +60,7 @@
 			height: fit-content;
 			display: flex;
 			flex-direction: column;
+			flex-wrap: wrap;
 			align-items: center;
 			gap: 10px;
 			margin-bottom: 16px;
@@ -68,6 +70,7 @@
 				max-width: 100%;
 				text-align: center;
 				white-space: wrap;
+				flex-wrap: wrap;
 			}
 
 			& a

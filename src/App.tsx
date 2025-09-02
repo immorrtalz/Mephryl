@@ -39,7 +39,7 @@ export default function App()
 		{
 			var reader = new FileReader();
 
-			reader.onload = (e) =>
+			reader.onload = async (e) =>
 			{
 				if (!e.target)
 				{
@@ -64,7 +64,7 @@ export default function App()
 					return reject('Unsupported output image format');
 				}
 
-				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
+				const blob = await imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
 				return blob ? resolve(blob) : resolve(null);
 			};
 
@@ -185,6 +185,7 @@ export default function App()
 						<p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
 							<br/>
 							By pressing "Continue", you agree to download ~13.6 MB of content.</p>
+							{ magickState === 'initializing' && <p>Loading...</p> }
 					</ModalWindow> }
 
 				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
