@@ -41,28 +41,14 @@ export default function App()
 
 			reader.onload = e =>
 			{
-				if (!e.target)
-				{
-					setError('File read error');
-					return reject('File read error');
-				}
+				if (!e.target) return reject(`File read error for ${imageItems[index].file.name}`);
 
 				const result = e.target.result as string; //base64 string
-
 				const inputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].inputFormat);
-				var outputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].outputFormat);
+				const outputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].outputFormat);
 
-				if (!inputMagickFormat)
-				{
-					setError('Unsupported input image format');
-					return reject('Unsupported input image format');
-				}
-
-				if (!outputMagickFormat)
-				{
-					setError('Unsupported output image format');
-					return reject('Unsupported output image format');
-				}
+				if (!inputMagickFormat) return reject(`Unsupported input image format for ${imageItems[index].file.name}`);
+				if (!outputMagickFormat) return reject(`Unsupported output image format for ${imageItems[index].file.name}`);
 
 				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
 				return blob ? resolve(blob) : resolve(null);
@@ -78,7 +64,7 @@ export default function App()
 
 		for (var i = 0; i < imageItems.length; i++)
 		{
-			const convertedBlob = await convertImage(i);
+			const convertedBlob = await convertImage(i).catch(e => setError(e));
 			convertedBlob ? imageItems[i].blob = convertedBlob : setError(`Error converting image ${imageItems[i].file.name}`);
 		}
 
