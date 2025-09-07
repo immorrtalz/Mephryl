@@ -14,7 +14,7 @@ import { supportedInputExtensions, GetAvailableOutputFormats, FormatToMagickForm
 export default function App()
 {
 	const [imageMagickManager] = useState(new ImageMagickManager());
-	const [magickState, setMagickState] = useState<'uninitialized' | 'initializing' | 'initialized'>('uninitialized');
+	const [magickState, setMagickState] = useState<'checkingForUpdates' | 'needsUpdate' | 'uninitializedWithCache' | 'uninitializedWithoutCache' | 'initializing' | 'initialized'>('checkingForUpdates');
 
 	/*
 	0 - default, 0 uploaded, can upload
@@ -131,7 +131,27 @@ export default function App()
 		setQualityModalOpened(true);
 	};
 
+	const initMagick = () =>
+	{
+		imageMagickManager.InitMagick()
+			.then(result => setMagickState(result ? 'initialized' : 'uninitializedWithoutCache'))
+			.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
+	}
+
 	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
+
+	useEffect(() =>
+	{
+		setMagickState('initializing');
+
+		imageMagickManager.CheckIfCacheNeedsUpdate()
+			.then(needsUpdate => imageMagickManager.CheckIfHasCache()
+				.then(hasCache =>
+				{
+					setMagickState(needsUpdate ? 'needsUpdate' : hasCache ? 'uninitializedWithCache' : 'uninitializedWithoutCache');
+					if (!needsUpdate && hasCache) initMagick();
+				}));
+	}, []);
 
 	return (
 		<div className={styles.pageContainer}>
@@ -158,18 +178,21 @@ export default function App()
 				}
 
 				{
-					magickState !== 'initialized' && <ModalWindow buttons={magickState === 'initializing' ? 0 : 1}
-						title={magickState === 'uninitialized' ? 'Attention required' : 'Loading...'} okTitle='Continue'
+					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'checkingForUpdates' || magickState === 'initializing' ? 0 : 1}
+						title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
+							magickState === 'needsUpdate' ? 'Update required' :
+							magickState === 'uninitializedWithoutCache' ? 'Attention required' :
+							'Loading...'}
+						okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
+						{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
 						onOK={() =>
 							{
-								setMagickState('initializing');
-
-								imageMagickManager.InitMagick()
-									.then(result => setMagickState(result ? 'initialized' : 'uninitialized'))
-									.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
+								if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
+								else initMagick();
 							}}>
 						{
-							magickState === 'uninitialized' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
+							magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
+							magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
 							<br/>
 							By pressing "Continue", you agree to download ~13.6 MB of content.</p> :
 							<p>Please wait...</p>

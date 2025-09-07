@@ -18,29 +18,31 @@ export class ImageMagickManager
 		{
 			caches.match('magickFetchResponse').then(wasmCache =>
 			{
-				if (wasmCache)
-				{
-					this.CheckIfNeedsUpdate().then(needsUpdate =>
-					{
-						if (needsUpdate) caches.delete('magickCache').then(window.location.reload);
-						else this.InitMagickFromResponse(wasmCache).then(resolve);
-					});
-				}
+				if (wasmCache) this.InitMagickFromResponse(wasmCache).then(resolve);
 				else this.FetchMagickFromUrl().then(resolve);
 			});
 		});
 	}
 
-	CheckIfNeedsUpdate(): Promise<boolean>
+	async CheckIfHasCache(): Promise<boolean>
+	{
+		const [wasmCache, versionCache] = await Promise.all([caches.match('magickFetchResponse'), caches.match('magickVersionResponse')]);
+		return !!(wasmCache && versionCache);
+	}
+
+	CheckIfCacheNeedsUpdate(): Promise<boolean>
 	{
 		return fetch(this.magickVersionFile)
 			.then(response => response.arrayBuffer())
 			.then(arrayBuffer =>
 			{
 				const prodVersion = new TextDecoder().decode(arrayBuffer);
-				return caches.match('magickVersionResponse').then(versionCache => versionCache ? versionCache.text().then(cachedVersion => cachedVersion !== prodVersion) : true);
+				console.log(prodVersion);
+				return caches.match('magickVersionResponse').then(versionCache => versionCache ? versionCache.text().then(cachedVersion => cachedVersion !== prodVersion) : false);
 			});
 	}
+
+	UpdateMagick = () => caches.match('magickFetchResponse').then(wasmCache => wasmCache ? caches.delete('magickCache').then(() => window.location.reload()) : window.location.reload());
 
 	FetchMagickFromUrl(): Promise<boolean>
 	{
