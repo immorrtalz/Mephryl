@@ -37,7 +37,6 @@ export class ImageMagickManager
 			.then(arrayBuffer =>
 			{
 				const prodVersion = new TextDecoder().decode(arrayBuffer);
-				console.log(prodVersion);
 				return caches.match('magickVersionResponse').then(versionCache => versionCache ? versionCache.text().then(cachedVersion => cachedVersion !== prodVersion) : false);
 			});
 	}
@@ -63,7 +62,7 @@ export class ImageMagickManager
 			.then(() =>
 			{
 				caches.open('magickCache').then(cache => cache.put('magickVersionResponse', new Response(Magick.imageMagickVersion, { headers: { 'Content-Type': 'text/plain' }})));
-				console.log(`ImageMagick ver. ${Magick.imageMagickVersion} initialized`);
+				console.log(`ImageMagick ver. "${Magick.imageMagickVersion}" initialized`);
 				return true;
 			}).catch(() => false);
 	}

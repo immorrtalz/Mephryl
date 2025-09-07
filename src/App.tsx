@@ -94,10 +94,11 @@ export default function App()
 		for (var i = 0; i < imageItems.length; i++) saveConvertedImage(i);
 	};
 
-	const onImageInputChange = (e: React.ChangeEvent<HTMLInputElement>) =>
+	const onImageInput = (e: React.ChangeEvent<HTMLInputElement>) =>
 	{
 		if (!e.target.files) return;
 		addImageItems(Array.from(e.target.files));
+		e.target.value = '';
 		e.target.files = null;
 	};
 
@@ -156,7 +157,7 @@ export default function App()
 	return (
 		<div className={styles.pageContainer}>
 
-			<input id='imageInput' ref={imageInput} onChange={onImageInputChange} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
+			<input id='imageInput' ref={imageInput} onInput={onImageInput} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
 
 			<AnimatePresence>
 				{
