@@ -3,13 +3,12 @@ import { Button, ButtonType } from '../Button';
 import { SVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
-import { IsFormatLossy } from '../../scripts/FormatsTools';
+import { supportedImageFormats, GetAvailableOutputFormats } from '../../scripts/FormatsTools';
 
 interface Props
 {
 	imageItem: ImageItemInfo;
 	phaseIndex: number;
-	supportedConvertFormats: string[];
 	onOpenSettings?: (...args : any[]) => any;
 	onChangeOutputFormat?: (...args : any[]) => any;
 	onChangeOutputQuality?: (...args : any[]) => any;
@@ -20,7 +19,7 @@ interface Props
 export default function UploadedImageItem(props: Props)
 {
 	const onOpenSettings = () => props.onOpenSettings?.();
-	const onChangeOutputFormat = (format: string) => props.onChangeOutputFormat?.(format);
+	const onChangeOutputFormat = (outputFormat: string) => props.onChangeOutputFormat?.(supportedImageFormats.find(format => format.name === outputFormat));
 	const onDownload = () => props.onDownload?.();
 	const onRemove = () => props.imageItem.file ? props.onRemove?.(props.imageItem.file) : undefined;
 
@@ -28,10 +27,12 @@ export default function UploadedImageItem(props: Props)
 	var fileSize = props.phaseIndex == 3 && props.imageItem.blob ? props.imageItem.blob.size : props.imageItem.file.size;
 	for (var fileSizeUnitIndex = 0; fileSizeUnitIndex < fileSizeUnits.length && fileSize >= 1024; fileSizeUnitIndex++) fileSize /= 1024;
 
+	const supportedConvertFormats = GetAvailableOutputFormats(props.imageItem);
+
 	return (
 		<div className={styles.uploadedImageItem}>
 			<div className={styles.textsContainer}>
-				<p className={`${styles.title} fontMedium`}>{props.phaseIndex == 3 ? `${props.imageItem.name}.${props.imageItem.outputFormat}` : props.imageItem.file.name}</p>
+				<p className={`${styles.title} fontMedium`}>{props.imageItem.name}{props.phaseIndex == 3 ? props.imageItem.outputFormat.extension : props.imageItem.inputFormat.extension}</p>
 				<p className={`${styles.info} font12`}>{Math.floor(fileSize * 100) / 100} {fileSizeUnits[fileSizeUnitIndex]}</p>
 			</div>
 
@@ -44,22 +45,22 @@ export default function UploadedImageItem(props: Props)
 									type={ButtonType.Secondary}
 									svg={<SVG name='settings'/>}
 									square
-									disabled={!IsFormatLossy(props.imageItem.outputFormat)}
+									disabled={!props.imageItem.outputFormat.isLossy}
 									onClick={onOpenSettings}/>
 							}
 
 							{
-								props.supportedConvertFormats.length !== 0 ? (
+								supportedConvertFormats.length !== 0 ? (
 									<Dropdown
 										options=
 										{
-											props.supportedConvertFormats.map((format) => (
+											supportedConvertFormats.map(format => (
 											{
 												title: format.toUpperCase(),
 												value: format
 											}))
 										}
-										onOptionClick={(format : string) => {onChangeOutputFormat(format)}}/>) : <></>
+										onOptionClick={(format: string) => {onChangeOutputFormat(format)}}/>) : <></>
 							}
 
 							<Button

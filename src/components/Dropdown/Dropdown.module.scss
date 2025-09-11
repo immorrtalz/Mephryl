@@ -123,24 +123,11 @@
 		flex-direction: column;
 		align-items: center;
 		gap: 2px;
-		overflow: clip;
+		overflow: clip auto;
+		scrollbar-gutter: stable;
 		transition: all 0.2s, height 0.5s cubic-bezier(0, 0.5, 0, 1);
 
-		@media (min-width: 768px)
-		{
-			animation: dropdown-open-scrollbar 0.2s ease-in-out;
-		}
-
-		@media (max-width: 768px)
-		{
-			transition: all 0.2s, height 0s;
-		}
-
-		@keyframes dropdown-open-scrollbar
-		{
-			99% { overflow: clip; }
-			100% { overflow: clip auto; }
-		}
+		@media (max-width: 768px) { transition: all 0.2s, height 0s; }
 
 		& > .option
 		{
@@ -151,6 +138,7 @@
 			color: rgba(255, 255, 255, 0.75);
 			border-radius: 12px;
 			text-align: center;
+			white-space: nowrap;
 			cursor: pointer;
 
 			&.current

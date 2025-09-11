@@ -12,10 +12,13 @@ Simple image converter with modern design
 
 Open source, works 100% locally and available in web
 
+Supports avif, bmp, exr, gif, jpg, jp2, j2k, jpm, j2c, jpc, jxl, png, tif and webp
+
 > [!TIP]
-> Use the latest release: https://evermedia.immorrtalz.com/Mephryl
+> Use the tool: https://evermedia.immorrtalz.com/Mephryl
 
 ---
 
 Library "ImageMagick" - Copyright © 1999 ImageMagick Studio LLC (https://github.com/ImageMagick/ImageMagick) licensed under the ImageMagick License https://imagemagick.org/script/license.php
+
 Font "Poppins" - Copyright © 2020 The Poppins Project Authors (https://github.com/itfoundry/Poppins)

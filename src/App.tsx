@@ -3,13 +3,12 @@ import { useEffect, useState, useRef } from 'react';
 import { AnimatePresence } from "motion/react";
 import { Button, ButtonType } from './components/Button';
 import { SVG } from './components/SVGLibrary';
-import { MagickFormat } from '@imagemagick/magick-wasm';
 import { ImageMagickManager } from './scripts/ImageMagickManager';
 import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
 import { ModalWindow } from './components/ModalWindow';
 import { Slider } from './components/Slider';
-import { supportedInputExtensions, GetAvailableOutputFormats, FormatToMagickFormat } from './scripts/FormatsTools';
+import { ImageFormat, supportedImageFormats } from './scripts/FormatsTools';
 
 export default function App()
 {
@@ -33,7 +32,7 @@ export default function App()
 	const imageInput = useRef<HTMLInputElement>(null);
 	const [isImageFilesDraggingOver, setIsImageFilesDraggingOver] = useState(false);
 
-	const convertImage = (index : number) : Promise<Blob | null> =>
+	const convertImage = (index: number): Promise<Blob | null> =>
 	{
 		return new Promise<Blob | null>((resolve, reject) =>
 		{
@@ -44,13 +43,7 @@ export default function App()
 				if (!e.target) return reject(`File read error for ${imageItems[index].file.name}`);
 
 				const result = e.target.result as string; //base64 string
-				const inputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].inputFormat);
-				const outputMagickFormat: MagickFormat | null = FormatToMagickFormat(imageItems[index].outputFormat);
-
-				if (!inputMagickFormat) return reject(`Unsupported input image format for ${imageItems[index].file.name}`);
-				if (!outputMagickFormat) return reject(`Unsupported output image format for ${imageItems[index].file.name}`);
-
-				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), outputMagickFormat);
+				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), imageItems[index].outputFormat.magickFormat);
 				return blob ? resolve(blob) : resolve(null);
 			};
 
@@ -79,14 +72,14 @@ export default function App()
 
 			const link = document.createElement('a');
 			link.href = url;
-			link.download = `${imageItems[index].name}.${imageItems[index].outputFormat}`;
+			link.download = imageItems[index].name + imageItems[index].outputFormat.extension;
 			document.body.appendChild(link);
 			link.click();
 			document.body.removeChild(link);
 
 			URL.revokeObjectURL(url);
 		}
-		else setError(`Error downloading image ${imageItems[index].name}.${imageItems[index].outputFormat}`);
+		else setError(`Error downloading image ${imageItems[index].name}${imageItems[index].outputFormat.extension}`);
 	};
 
 	const saveAllConvertedImages = () =>
@@ -122,7 +115,7 @@ export default function App()
 		if (e.dataTransfer.items) addImageItems(Array.from(e.dataTransfer.files));
 	};
 
-	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file, null, GetAvailableOutputFormats(file)[0]))]);
+	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
 	const openQualityModal = (targetIndex: number) =>
@@ -157,7 +150,7 @@ export default function App()
 	return (
 		<div className={styles.pageContainer}>
 
-			<input id='imageInput' ref={imageInput} onInput={onImageInput} type='file' accept={supportedInputExtensions.join(', ')} multiple/>
+			<input id='imageInput' ref={imageInput} onInput={onImageInput} type='file' accept={supportedImageFormats.map(format => format.extension).join(', ')} multiple/>
 
 			<AnimatePresence>
 				{
@@ -179,7 +172,7 @@ export default function App()
 				}
 
 				{
-					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'checkingForUpdates' || magickState === 'initializing' ? 0 : 1}
+					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'needsUpdate' || magickState === 'uninitializedWithoutCache' ? 1 : 0}
 						title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
 							magickState === 'needsUpdate' ? 'Update required' :
 							magickState === 'uninitializedWithoutCache' ? 'Attention required' :
@@ -229,7 +222,7 @@ export default function App()
 
 				<p className={`${styles.mainDescription} colorWhite50 font20`}>
 					{
-						phaseIndex <= 1 ? 'Supported formats are: PNG, JPG, GIF, WEBP and more' :
+						phaseIndex <= 1 ? 'Supported formats are: PNG, JPG, TIF, WEBP and more' :
 						phaseIndex == 2 ? <>Please&nbsp;wait,&nbsp;this&nbsp;might take&nbsp;a&nbsp;while</> :
 						<>Save&nbsp;them&nbsp;– they'll&nbsp;be&nbsp;lost when&nbsp;you&nbsp;close&nbsp;the&nbsp;page</>
 					}
@@ -254,9 +247,8 @@ export default function App()
 								key={index}
 								imageItem={imageItem}
 								phaseIndex={phaseIndex}
-								supportedConvertFormats={GetAvailableOutputFormats(imageItem.file)}
 								onOpenSettings={() => openQualityModal(index)}
-								onChangeOutputFormat={(outputFormat: string) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
+								onChangeOutputFormat={(outputFormat: ImageFormat) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
 								onDownload={() => saveConvertedImage(index)}
 								onRemove={onRemoveUploadedImageFile}/>)
 					}
@@ -283,7 +275,7 @@ export default function App()
 						onClick={() => openQualityModal(-1)}/>
 
 					<Button
-						title='Convert all'
+						title={'Convert' + (imageItems.length == 1 ? '' : ' all')}
 						svg={<SVG name='convert'/>}
 						onClick={convertAllImages}/>
 				</div>
