@@ -8,7 +8,9 @@ import { ImageItemInfo } from './scripts/ImageItemInfo';
 import ImageItem from './components/ImageItem';
 import { ModalWindow } from './components/ModalWindow';
 import { Slider } from './components/Slider';
-import { ImageFormat, supportedImageFormats } from './scripts/FormatsTools';
+import { ImageFormat, supportedImageFormats, GetOutputFormats } from './scripts/FormatsTools';
+import { Dropdown } from './components/Dropdown';
+import { Checkbox } from './components/Checkbox';
 
 export default function App()
 {
@@ -25,9 +27,11 @@ export default function App()
 
 	const [imageItems, setImageItems] = useState<ImageItemInfo[]>([]);
 
-	const [isQualityModalOpened, setQualityModalOpened] = useState(false);
-	const [qualityModalTargetIndex, setQualityModalTargetIndex] = useState(-1);
+	const [isConvertOptionsOpened, setConvertOptionsOpened] = useState(false);
+	const [convertOptionsTargetIndex, setConvertOptionsTargetIndex] = useState(-1);
+	const [outputFormat, setOutputFormat] = useState<ImageFormat>(supportedImageFormats[0]);
 	const [qualityValue, setQualityValue] = useState(100);
+	const [convertOptionsCheckmarks, setConvertOptionsCheckmarks] = useState([true, true]);
 
 	const imageInput = useRef<HTMLInputElement>(null);
 	const [isImageFilesDraggingOver, setIsImageFilesDraggingOver] = useState(false);
@@ -42,9 +46,9 @@ export default function App()
 			{
 				if (!e.target) return reject(`File read error for ${imageItems[index].file.name}`);
 
-				const result = e.target.result as string; //base64 string
-				const blob = imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(result.split(',')[1]), c => c.charCodeAt(0)), imageItems[index].outputFormat.magickFormat);
-				return blob ? resolve(blob) : resolve(null);
+				const base64Result = e.target.result as string;
+				imageMagickManager.ConvertImage(imageItems[index], Uint8Array.from(atob(base64Result.split(',')[1]), c => c.charCodeAt(0)), imageItems[index].outputFormat.magickFormat)
+					.then(resolve);
 			};
 
 			reader.readAsDataURL(imageItems[index].file);
@@ -118,11 +122,12 @@ export default function App()
 	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
-	const openQualityModal = (targetIndex: number) =>
+	const openConvertOptions = (targetIndex: number) =>
 	{
-		setQualityModalTargetIndex(targetIndex);
+		setConvertOptionsTargetIndex(targetIndex);
+		setOutputFormat(imageItems[targetIndex == -1 ? 0 : targetIndex].outputFormat);
 		setQualityValue(targetIndex == -1 ? 100 : imageItems[targetIndex].outputQuality);
-		setQualityModalOpened(true);
+		setConvertOptionsOpened(true);
 	};
 
 	const initMagick = () =>
@@ -132,7 +137,7 @@ export default function App()
 			.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
 	}
 
-	useEffect(() => setPhaseIndex(imageItems.length > 0 ? 1 : 0), [imageItems]);
+	useEffect(() => setPhaseIndex(imageItems.length ? 1 : 0), [imageItems]);
 
 	useEffect(() =>
 	{
@@ -151,51 +156,6 @@ export default function App()
 		<div className={styles.pageContainer}>
 
 			<input id='imageInput' ref={imageInput} onInput={onImageInput} type='file' accept={supportedImageFormats.map(format => format.extension).join(', ')} multiple/>
-
-			<AnimatePresence>
-				{
-					isQualityModalOpened && <ModalWindow
-						title='Conversion settings'
-						okTitle={qualityModalTargetIndex == -1 ? 'Apply to all' : 'Apply'}
-						onCancel={() => setQualityModalOpened(false)}
-						onOK={() =>
-						{
-							setImageItems(prev => prev.map((item, i) => qualityModalTargetIndex == -1 || i === qualityModalTargetIndex ? { ...item, outputQuality: qualityValue } : item));
-							setQualityModalOpened(false);
-						}}>
-						<div className='modalContentElement'>
-							<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
-							<Slider min={1} max={100} step={1} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}/>
-							<p style={{width: '28px'}}>{qualityValue}</p>
-						</div>
-					</ModalWindow>
-				}
-
-				{
-					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'needsUpdate' || magickState === 'uninitializedWithoutCache' ? 1 : 0}
-						title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
-							magickState === 'needsUpdate' ? 'Update required' :
-							magickState === 'uninitializedWithoutCache' ? 'Attention required' :
-							'Loading...'}
-						okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
-						{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
-						onOK={() =>
-							{
-								if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
-								else initMagick();
-							}}>
-						{
-							magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
-							magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
-							<br/>
-							By pressing "Continue", you agree to download ~13.6 MB of content.</p> :
-							<p>Please wait...</p>
-						}
-					</ModalWindow>
-				}
-
-				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
-			</AnimatePresence>
 
 			<header>
 				<div className={styles.logo}>
@@ -222,7 +182,7 @@ export default function App()
 
 				<p className={`${styles.mainDescription} colorWhite50 font20`}>
 					{
-						phaseIndex <= 1 ? 'Supported formats are: PNG, JPG, TIF, WEBP and more' :
+						phaseIndex <= 1 ? 'Supported formats: PNG, JPG, TIF, WEBP and more' :
 						phaseIndex == 2 ? <>Please&nbsp;wait,&nbsp;this&nbsp;might take&nbsp;a&nbsp;while</> :
 						<>Save&nbsp;them&nbsp;– they'll&nbsp;be&nbsp;lost when&nbsp;you&nbsp;close&nbsp;the&nbsp;page</>
 					}
@@ -236,7 +196,7 @@ export default function App()
 						onClick={selectImageFiles}/>
 
 					{/* <Button
-						svg={<LinkSVG/>}
+						svg={<SVG name='link'/>}
 						square/> */}
 				</div>
 
@@ -244,10 +204,10 @@ export default function App()
 					{
 						imageItems.map((imageItem, index) =>
 							<ImageItem
-								key={index}
+								key={`${imageItem.file.name}-${imageItem.outputFormat.name}-${index}`}
 								imageItem={imageItem}
 								phaseIndex={phaseIndex}
-								onOpenSettings={() => openQualityModal(index)}
+								onOpenSettings={() => openConvertOptions(index)}
 								onChangeOutputFormat={(outputFormat: ImageFormat) => setImageItems(current => current.map((item, i) => i == index ? { ...item, outputFormat: outputFormat } : item))}
 								onDownload={() => saveConvertedImage(index)}
 								onRemove={onRemoveUploadedImageFile}/>)
@@ -265,14 +225,14 @@ export default function App()
 
 					{/* <Button
 						type={ButtonType.Secondary}
-						svg={<LinkSVG/>}
+						svg={<SVG name='link'/>}
 						square/> */}
 
 					<Button
 						type={ButtonType.Secondary}
 						square
 						svg={<SVG name='settings'/>}
-						onClick={() => openQualityModal(-1)}/>
+						onClick={() => openConvertOptions(-1)}/>
 
 					<Button
 						title={'Convert' + (imageItems.length == 1 ? '' : ' all')}
@@ -305,6 +265,89 @@ export default function App()
 					View on GitHub
 				</a>
 			</footer>
+
+			<AnimatePresence>
+				{
+					isConvertOptionsOpened && <ModalWindow
+						title='Conversion settings'
+						okTitle={convertOptionsTargetIndex === -1 ? 'Apply to all' : 'Apply'}
+						onCancel={() => setConvertOptionsOpened(false)}
+						onOK={convertOptionsTargetIndex != -1 || convertOptionsCheckmarks.some(Boolean) ? () =>
+						{
+							setImageItems(prev => prev.map((item, i) =>
+							{
+								const isTargetItem = convertOptionsTargetIndex === -1 || convertOptionsTargetIndex === i;
+								if (!isTargetItem) return item;
+
+								const shouldUpdateFormat = convertOptionsTargetIndex === i || (convertOptionsTargetIndex === -1 && convertOptionsCheckmarks[0]);
+								const shouldUpdateQuality = convertOptionsTargetIndex === i || (convertOptionsTargetIndex === -1 && convertOptionsCheckmarks[1] && (!convertOptionsCheckmarks[0] || outputFormat.isLossy));
+
+								return {...item, outputFormat: shouldUpdateFormat ? outputFormat : item.outputFormat, outputQuality: shouldUpdateQuality ? qualityValue : item.outputQuality};
+							}));
+
+							setConvertOptionsOpened(false);
+						} : undefined}>
+
+						{
+							convertOptionsTargetIndex === -1 && <div className={`modalContentElement ${phaseIndex == 1 ? '' : 'displayNone'}`}>
+								{
+									convertOptionsTargetIndex === -1 &&
+										<Checkbox checked={convertOptionsCheckmarks[0]} onChange={e => setConvertOptionsCheckmarks([e.target.checked, convertOptionsCheckmarks[1]])}/>
+								}
+								<p>Convert all to</p>
+								<Dropdown
+									options=
+									{
+										GetOutputFormats().map(format => (
+										{
+											title: format.toUpperCase(),
+											value: format
+										}))
+									}
+									currentOptionIndex={GetOutputFormats().findIndex(formatName => formatName === outputFormat.name)}
+									onOptionClick={(format: string) => setOutputFormat(supportedImageFormats.find(f => f.name === format)!)}
+									disabled={convertOptionsTargetIndex === -1 && !convertOptionsCheckmarks[0]}/>
+							</div>
+						}
+
+						<div className='modalContentElement'>
+							{
+								convertOptionsTargetIndex === -1 &&
+									<Checkbox checked={convertOptionsCheckmarks[1]} onChange={e => setConvertOptionsCheckmarks([convertOptionsCheckmarks[0], e.target.checked])}/>
+							}
+							<p>Quality <span className='font14 colorWhite50'>(usually set to 85-97)</span></p>
+							<Slider min={1} max={100} step={1} value={qualityValue} onInput={e => setQualityValue(Number(e.target.value))}
+								disabled={convertOptionsTargetIndex === -1 && (!convertOptionsCheckmarks[1] || convertOptionsCheckmarks[0] && !outputFormat.isLossy)}/>
+							<p style={{ width: '28px' }}>{qualityValue}</p>
+						</div>
+					</ModalWindow>
+				}
+
+				{
+					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'needsUpdate' || magickState === 'uninitializedWithoutCache' ? 1 : 0}
+						title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
+							magickState === 'needsUpdate' ? 'Update required' :
+							magickState === 'uninitializedWithoutCache' ? 'Attention required' :
+							'Loading...'}
+						okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
+						{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
+						onOK={() =>
+							{
+								if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
+								else initMagick();
+							}}>
+						{
+							magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
+							magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
+							<br/>
+							By pressing "Continue", you agree to download ~13.7 MB of content.</p> :
+							<p>Please wait...</p>
+						}
+					</ModalWindow>
+				}
+
+				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }
+			</AnimatePresence>
 
 		</div>
 	);

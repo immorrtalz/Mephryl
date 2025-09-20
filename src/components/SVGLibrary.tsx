@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 
-const names = ['logoText', 'upload', 'download', 'link', 'settings', 'delete', 'convert', 'checkmark', 'arrowDown', 'cancel'];
+const names = ['logoText', 'upload', 'download', 'link', 'settings', 'delete', 'convert', 'checkmark', 'checkmarkOutlined', 'arrowDown', 'cancel'];
 
 interface Props
 {
@@ -15,20 +15,21 @@ interface SvgParams
 	viewBox?: string;
 }
 
-export function SVG(props : Props)
+export function SVG(props: Props)
 {
 	const ParamsMap: Record<string, SvgParams> =
 	{
-		'logoText': { width:'202', height:'47', viewBox:'0 0 202 47' },
-		'upload': { width:'16', height:'16', viewBox:'0 0 16 16' },
-		'download': { width:'16', height:'16', viewBox:'0 0 16 16' },
-		'link': { width:'16', height:'16', viewBox:'0 0 16 16' },
-		'settings': { width:'20', height:'20', viewBox:'0 0 20 20' },
-		'delete': { width:'16', height:'16', viewBox:'0 0 16 18' },
-		'convert': { width:'16', height:'16', viewBox:'0 0 16 16' },
-		'checkmark': { width:'18', height:'18', viewBox:'0 0 18 18' },
-		'arrowDown': { width:'14', height:'14', viewBox:'0 0 14 8' },
-		'cancel': { width:'14', height:'14', viewBox:'0 0 16 16' }
+		'logoText': { width: '202', height: '47', viewBox: '0 0 202 47' },
+		'upload': { width: '16', height: '16', viewBox: '0 0 16 16' },
+		'download': { width: '16', height: '16', viewBox: '0 0 16 16' },
+		'link': { width: '16', height: '16', viewBox: '0 0 16 16' },
+		'settings': { width: '20', height: '20', viewBox: '0 0 20 20' },
+		'delete': { width: '16', height: '16', viewBox: '0 0 16 18' },
+		'convert': { width: '16', height: '16', viewBox: '0 0 16 16' },
+		'checkmark': { width: '16', height: '13', viewBox: '0 0 12 10' },
+		'checkmarkOutlined': { width: '18', height: '18', viewBox: '0 0 18 18' },
+		'arrowDown': { width: '14', height: '14', viewBox: '0 0 14 8' },
+		'cancel': { width: '14', height: '14', viewBox: '0 0 16 16' }
 	};
 
 	const PathsMap: Record<string, ReactElement> =
@@ -64,7 +65,8 @@ export function SVG(props : Props)
 				<path d='M15.9266 9.08812C15.3958 12.9917 12.0492 16 8 16C5.61062 16 3.46589 14.9525 2 13.2916V15C2 15.5523 1.55229 16 1 16C0.447716 16 4.17544e-07 15.5523 3.93402e-07 15L0 11C-2.41411e-08 10.4477 0.447715 10 1 10H5C5.55228 10 6 10.4477 6 11C6 11.5523 5.55228 12 5 12H3.52779C4.62643 13.2275 6.223 14 8 14C11.0058 14 13.4954 11.7897 13.9321 8.90582C14.0072 8.4094 14.407 8 14.9091 8C15.5116 8 16.0078 8.49112 15.9266 9.08812Z'/>
 				<path d='M0.0733791 6.91188C0.60423 3.00832 3.9508 1.77137e-07 8 0C10.3894 0 12.5341 1.04751 14 2.70835V1C14 0.447715 14.4477 0 15 0C15.5523 0 16 0.447715 16 1V5C16 5.55228 15.5523 6 15 6L11 6C10.4477 6 10 5.55228 10 5C10 4.44772 10.4477 4 11 4H12.4722C11.3736 2.7725 9.777 2 8 2C4.9942 2 2.50464 4.21027 2.06793 7.09418C1.99276 7.5906 1.59299 8 1.09091 8C0.488417 8 -0.00780743 7.50888 0.0733791 6.91188Z'/>
 			</>,
-		'checkmark': <>
+		'checkmark': <path d="M9.4334 0.50726C9.7884 0.0841897 10.4192 0.0289997 10.8423 0.384C11.2653 0.739 11.3205 1.36976 10.9655 1.79284L5.18042 8.6873C4.82543 9.1103 4.19469 9.1655 3.77161 8.8105L0.707229 6.2393C0.284139 5.8843 0.228949 5.2536 0.583949 4.83051C0.938949 4.40744 1.5697 4.35226 1.99277 4.70725L4.29104 6.6357L9.4334 0.50726Z"/>,
+		'checkmarkOutlined': <>
 				<path fillRule='evenodd' clipRule='evenodd' d='M9 18C13.9706 18 18 13.9706 18 9C18 4.02944 13.9706 0 9 0C4.02944 0 0 4.02944 0 9C0 13.9706 4.02944 18 9 18ZM9 16C12.866 16 16 12.866 16 9C16 5.13401 12.866 2 9 2C5.13401 2 2 5.13401 2 9C2 12.866 5.13401 16 9 16Z'/>
 				<path d='M12.4334 5.50726C12.7884 5.08419 13.4192 5.029 13.8423 5.384C14.2653 5.739 14.3205 6.36976 13.9655 6.79284L8.18042 13.6873C7.82543 14.1103 7.19469 14.1655 6.77161 13.8105L3.70723 11.2393C3.28414 10.8843 3.22895 10.2536 3.58395 9.83051C3.93895 9.40744 4.5697 9.35226 4.99277 9.70725L7.29104 11.6357L12.4334 5.50726Z'/>
 			</>,
@@ -79,3 +81,10 @@ export function SVG(props : Props)
 			</svg>
 	);
 }
+
+{/*
+<svg width="12" height="10" viewBox="0 0 12 10" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+</svg>
+
+ */}

@@ -46,8 +46,8 @@
 
 		&:disabled
 		{
-			background: rgba(255, 255, 255, 0.05);
 			pointer-events: none;
+			cursor: default;
 		}
 	}
 
@@ -86,28 +86,27 @@
 			box-shadow: 0 4px 32px 0 rgba(0, 0, 0, 1);
 		}
 	}
+
+	&.disabled
+	{
+		pointer-events: none;
+		cursor: default;
+
+		.slider::-webkit-slider-runnable-track
+		{
+			background: rgba(255, 255, 255, 0.1);
+			pointer-events: none;
+			cursor: default;
+		}
+
+		.slider::-webkit-slider-thumb
+		{
+			background: rgba(255, 255, 255, 0.25);
+			box-shadow: -157px 0 0 150px rgba(255, 255, 255, 0.25);
+			pointer-events: none;
+			cursor: default;
+		}
+
+		.thumb { background: rgba(255, 255, 255, 0.25); }
+	}
 }
-
-/* .secondaryButton
-{
-	background: rgba(255, 255, 255, 0.1);
-	box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
-	color: rgba(255, 255, 255, 0.75);
-	fill: rgba(255, 255, 255, 0.75);
-
-	&:hover
-	{
-		background: rgba(255, 255, 255, 0.35);
-		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.35);
-		color: rgba(255, 255, 255, 0.9);
-		fill: rgba(255, 255, 255, 0.9);
-	}
-
-	&:active
-	{
-		background: rgba(255, 255, 255, 0.05);
-		box-shadow: 0 8px 64px 0 rgba(0, 0, 0, 0.15);
-		color: rgba(255, 255, 255, 0.35);
-		fill: rgba(255, 255, 255, 0.35);
-	}
-} */

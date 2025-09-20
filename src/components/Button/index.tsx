@@ -39,7 +39,7 @@ export function Button(props: Props)
 	if (props.square) dynamicClassNames.push(styles.squareButton);
 
 	return (
-		<button className={`${styles.button} ${dynamicClassNames.join(' ')} fontMedium bgBlur`} onClick={onClick} disabled={props.disabled}>
+		<button className={`${styles.button} ${dynamicClassNames.join(' ')} fontMedium bgBlur`} onClick={props.disabled ? undefined : onClick} disabled={props.disabled}>
 			{props.svg}
 			{props.title}
 		</button>

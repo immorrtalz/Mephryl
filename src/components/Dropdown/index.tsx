@@ -17,6 +17,7 @@ class DropdownOption
 interface Props
 {
 	options: DropdownOption[];
+	currentOptionIndex?: number;
 	disabled?: boolean;
 	onClick?: (...args: any[]) => any;
 	onOptionClick?: (...args: any[]) => any;
@@ -26,7 +27,7 @@ export function Dropdown(props: Props)
 {
 	if (props.options.length == 0) return (<></>);
 
-	const [currentOptionIndex, setCurrentOptionIndex] = useState(0);
+	const [currentOptionIndex, setCurrentOptionIndex] = useState(props.currentOptionIndex ?? 0);
 	const dropdownBGRef = useRef<HTMLDivElement>(null);
 	const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -48,16 +49,20 @@ export function Dropdown(props: Props)
 		onClick();
 	};
 
-	useEffect(() => { if (props.onOptionClick) props.onOptionClick(props.options[currentOptionIndex].value); }, [currentOptionIndex]);
+	useEffect(() => props.disabled ? undefined : props.onOptionClick?.(props.options[currentOptionIndex].value), [currentOptionIndex]);
 
 	return (
 		<>
-			<span ref={dropdownBGRef} className='displayNone' style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'all', zIndex: 10 }} onClick={onClick}/>
-			<div ref={dropdownRef} className={`${styles.dropdown} fontMedium`} onClick={onClick}>
+			<span ref={dropdownBGRef} className='displayNone' style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', pointerEvents: 'all', zIndex: 1 }} onClick={onClick}/>
+			<div ref={dropdownRef} className={`${styles.dropdown} ${props.disabled ? styles.disabled : ''} fontMedium`} onClick={props.disabled ? undefined : onClick}>
 				<p>{props.options[currentOptionIndex].title}</p>
 				<SVG name='arrowDown'/>
 				<div className={styles.options} onClick={e => e.stopPropagation()}>
-					{props.options.map((option, index) => <div key={index} className={`${styles.option} ${index == currentOptionIndex ? styles.current : ''} fontRegular`} onClick={onOptionClick}>{option.title}</div>)}
+					{
+						props.options.map((option, index) => <div key={`${props.currentOptionIndex}-${index}`}
+							className={`${styles.option} ${index == currentOptionIndex ? styles.current : ''} fontRegular`}
+							onClick={props.disabled ? undefined : onOptionClick}>{option.title}</div>)
+					}
 				</div>
 			</div>
 		</>

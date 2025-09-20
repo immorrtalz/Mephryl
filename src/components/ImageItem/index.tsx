@@ -3,15 +3,15 @@ import { Button, ButtonType } from '../Button';
 import { SVG } from '../SVGLibrary';
 import { Dropdown } from '../Dropdown';
 import { ImageItemInfo } from '../../scripts/ImageItemInfo';
-import { supportedImageFormats, GetAvailableOutputFormats } from '../../scripts/FormatsTools';
+import { supportedImageFormats, GetOutputFormats } from '../../scripts/FormatsTools';
 
 interface Props
 {
 	imageItem: ImageItemInfo;
 	phaseIndex: number;
-	onOpenSettings?: (...args : any[]) => any;
-	onChangeOutputFormat?: (...args : any[]) => any;
-	onChangeOutputQuality?: (...args : any[]) => any;
+	onOpenSettings?: (...args: any[]) => any;
+	onChangeOutputFormat?: (...args: any[]) => any;
+	onChangeOutputQuality?: (...args: any[]) => any;
 	onDownload?: (...args: any[]) => any;
 	onRemove?: (...args: any[]) => any;
 }
@@ -27,7 +27,7 @@ export default function UploadedImageItem(props: Props)
 	var fileSize = props.phaseIndex == 3 && props.imageItem.blob ? props.imageItem.blob.size : props.imageItem.file.size;
 	for (var fileSizeUnitIndex = 0; fileSizeUnitIndex < fileSizeUnits.length && fileSize >= 1024; fileSizeUnitIndex++) fileSize /= 1024;
 
-	const supportedConvertFormats = GetAvailableOutputFormats(props.imageItem);
+	const supportedConvertFormats = GetOutputFormats();
 
 	return (
 		<div className={styles.uploadedImageItem}>
@@ -50,7 +50,7 @@ export default function UploadedImageItem(props: Props)
 							}
 
 							{
-								supportedConvertFormats.length !== 0 ? (
+								supportedConvertFormats.length !== 0 &&
 									<Dropdown
 										options=
 										{
@@ -60,7 +60,8 @@ export default function UploadedImageItem(props: Props)
 												value: format
 											}))
 										}
-										onOptionClick={(format: string) => {onChangeOutputFormat(format)}}/>) : <></>
+										currentOptionIndex={supportedConvertFormats.findIndex(format => format === props.imageItem.outputFormat.name)}
+										onOptionClick={(format: string) => onChangeOutputFormat(format)}/>
 							}
 
 							<Button

@@ -1,5 +1,4 @@
 import { MagickFormat } from "@imagemagick/magick-wasm";
-import { ImageItemInfo } from "./ImageItemInfo";
 
 export class ImageFormat
 {
@@ -38,5 +37,4 @@ export const supportedImageFormats = [
 	new ImageFormat('webp', '.webp', 'image/webp', MagickFormat.WebP, true)
 ];
 
-export const GetAvailableOutputFormats = (file: ImageItemInfo): string[] => supportedImageFormats
-	.filter(outputFormat => file.inputFormat.mimeType !== outputFormat.mimeType && !['jpeg', 'tiff'].includes(outputFormat.name)).map(format => format.name);
+export const GetOutputFormats = (): string[] => supportedImageFormats.filter(outputFormat => !['jpeg', 'tiff'].includes(outputFormat.name)).map(format => format.name);
