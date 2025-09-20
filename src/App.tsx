@@ -132,6 +132,8 @@ export default function App()
 
 	const initMagick = () =>
 	{
+		setMagickState('initializing');
+
 		imageMagickManager.InitMagick()
 			.then(result => setMagickState(result ? 'initialized' : 'uninitializedWithoutCache'))
 			.catch(() => setError('Failed to initialize ImageMagick (a library required for the tool to work)'));
@@ -141,8 +143,6 @@ export default function App()
 
 	useEffect(() =>
 	{
-		setMagickState('initializing');
-
 		imageMagickManager.CheckIfCacheNeedsUpdate()
 			.then(needsUpdate => imageMagickManager.CheckIfHasCache()
 				.then(hasCache =>
@@ -331,11 +331,11 @@ export default function App()
 							'Loading...'}
 						okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
 						{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
-						onOK={() =>
+						onOK={magickState !== 'initializing' ? () =>
 							{
 								if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
 								else initMagick();
-							}}>
+							} : undefined}>
 						{
 							magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
 							magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
