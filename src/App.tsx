@@ -11,11 +11,13 @@ import { Slider } from './components/Slider';
 import { ImageFormat, supportedImageFormats, GetOutputFormats } from './scripts/FormatsTools';
 import { Dropdown } from './components/Dropdown';
 import { Checkbox } from './components/Checkbox';
+import { InputField } from './components/InputField';
 
 export default function App()
 {
 	const [imageMagickManager] = useState(new ImageMagickManager());
-	const [magickState, setMagickState] = useState<'checkingForUpdates' | 'needsUpdate' | 'uninitializedWithCache' | 'uninitializedWithoutCache' | 'initializing' | 'initialized'>('checkingForUpdates');
+	const [magickState, setMagickState] = useState<'checkingForUpdates' | 'needsUpdate' | 'uninitializedWithCache' | 'uninitializedWithoutCache'
+		| 'initializing' | 'initialized'>('checkingForUpdates');
 
 	/*
 	0 - default, 0 uploaded, can upload
@@ -32,6 +34,11 @@ export default function App()
 	const [outputFormat, setOutputFormat] = useState<ImageFormat>(supportedImageFormats[0]);
 	const [qualityValue, setQualityValue] = useState(100);
 	const [convertOptionsCheckmarks, setConvertOptionsCheckmarks] = useState([true, true]);
+
+	const [imageFetchState, setImageFetchState] = useState<'idle' | 'fetching'>('idle');
+	const [isImageFetchOpened, setImageFetchOpened] = useState(false);
+	const [imageFetchUrl, setImageFetchUrl] = useState("");
+	const [imageFetchError, setImageFetchError] = useState("");
 
 	const imageInput = useRef<HTMLInputElement>(null);
 	const [isImageFilesDraggingOver, setIsImageFilesDraggingOver] = useState(false);
@@ -122,6 +129,62 @@ export default function App()
 	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
+	const fetchImageFromUrl = async () =>
+	{
+		setImageFetchState('fetching');
+
+		if (isImageFetchUrlValid())
+		{
+			setImageFetchError("");
+
+			try
+			{
+				fetch(imageFetchUrl)
+					.then(response => response.blob())
+					.then(blob =>
+					{
+						setImageFetchOpened(false);
+						setImageFetchState('idle');
+						addImageItems([new File([blob], (imageFetchUrl.replace('http://', '').replace('https://', '').replace(/[^a-zA-Z0-9\-_.]/g, '_')
+							|| `fetched_image_${Math.floor(Math.random() * 10000)}`), { type: blob.type })]);
+					})
+					.catch(() =>
+					{
+						fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(imageFetchUrl)}`)
+							.then(response => response.blob())
+							.then(blob =>
+							{
+								setImageFetchOpened(false);
+								setImageFetchState('idle');
+								addImageItems([new File([blob], (imageFetchUrl.replace('http://', '').replace('https://', '').replace(/[^a-zA-Z0-9\-_.]/g, '_')
+									|| `fetched_image_${Math.floor(Math.random() * 10000)}`), { type: blob.type })]);
+							})
+							.catch(() =>
+							{
+								setImageFetchState('idle');
+								setImageFetchError(`Failed to fetch an image from "${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}"`);
+							});
+					});
+			}
+			catch
+			{
+				setImageFetchState('idle');
+				setImageFetchError(`Failed to fetch an image from "${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}"`);
+			}
+		}
+		else
+		{
+			setImageFetchState('idle');
+			setImageFetchError(`"${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}" is invalid URL`);
+		}
+	}
+
+	const isImageFetchUrlValid = (url: string = ""): boolean =>
+	{
+		const loweredUrl = (!!url ? url : imageFetchUrl).toLowerCase();
+		return (loweredUrl.startsWith('http://') || loweredUrl.startsWith('https://')) && loweredUrl !== 'http://' && loweredUrl !== 'https://';
+	};
+
 	const openConvertOptions = (targetIndex: number) =>
 	{
 		setConvertOptionsTargetIndex(targetIndex);
@@ -140,6 +203,15 @@ export default function App()
 	}
 
 	useEffect(() => setPhaseIndex(imageItems.length ? 1 : 0), [imageItems]);
+
+	useEffect(() =>
+	{
+		if (!isImageFetchOpened)
+		{
+			setImageFetchUrl("");
+			setImageFetchError("");
+		}
+	}, [isImageFetchOpened]);
 
 	useEffect(() =>
 	{
@@ -195,9 +267,10 @@ export default function App()
 						disabled={magickState !== 'initialized'}
 						onClick={selectImageFiles}/>
 
-					{/* <Button
+					<Button
 						svg={<SVG name='link'/>}
-						square/> */}
+						onClick={() => setImageFetchOpened(true)}
+						square/>
 				</div>
 
 				<div className={`${styles.uploadedImagesContainer} ${phaseIndex > 0 ? '' : 'displayNone'}`}>
@@ -223,10 +296,11 @@ export default function App()
 						svg={<SVG name='upload'/>}
 						onClick={selectImageFiles}/>
 
-					{/* <Button
+					<Button
 						type={ButtonType.Secondary}
 						svg={<SVG name='link'/>}
-						square/> */}
+						onClick={() => setImageFetchOpened(true)}
+						square/>
 
 					<Button
 						type={ButtonType.Secondary}
@@ -268,7 +342,7 @@ export default function App()
 
 			<AnimatePresence>
 				{
-					isConvertOptionsOpened && <ModalWindow
+					isConvertOptionsOpened && <ModalWindow key="convertOptionsModal"
 						title='Conversion settings'
 						okTitle={convertOptionsTargetIndex === -1 ? 'Apply to all' : 'Apply'}
 						onCancel={() => setConvertOptionsOpened(false)}
@@ -324,26 +398,67 @@ export default function App()
 				}
 
 				{
-					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' && <ModalWindow buttons={magickState === 'needsUpdate' || magickState === 'uninitializedWithoutCache' ? 1 : 0}
-						title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
-							magickState === 'needsUpdate' ? 'Update required' :
-							magickState === 'uninitializedWithoutCache' ? 'Attention required' :
-							'Loading...'}
-						okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
-						{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
-						onOK={magickState !== 'initializing' ? () =>
-							{
-								if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
-								else initMagick();
-							} : undefined}>
+					isImageFetchOpened && <ModalWindow key="fetchImageModal"
+						buttons={imageFetchState === 'idle' ? 2 : 0}
+						title={imageFetchState === 'idle' ? 'Fetch image from URL' : 'Fetching an image...'}
+						okTitle='Continue'
+						okSvg='download'
+						onOK={imageFetchState === 'idle' && isImageFetchUrlValid() ? fetchImageFromUrl : undefined}
+						onCancel={imageFetchState === 'idle' ? () => setImageFetchOpened(false) : undefined}>
 						{
-							magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
-							magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
-							<br/>
-							By pressing "Continue", you agree to download ~13.7 MB of content.</p> :
-							<p>Please wait...</p>
+							<>
+								{
+									imageFetchState === 'idle' ?
+										<p>The URL must start with <a>http://</a> or <a>https://</a></p> :
+										<p>Please wait...</p>
+								}
+
+								{ !!imageFetchError && <p className={`${styles.imageFetchErrorText} fontSemibold`}>{imageFetchError}</p> }
+
+								<InputField value={imageFetchUrl} placeholder='https://example.com/image.jpg'
+									onChange={e =>
+									{
+										const url = (e.target.value as string).trim();
+										setImageFetchUrl(url);
+										if (!url)
+										{
+											setImageFetchError("Enter a URL");
+											return;
+										}
+										isImageFetchUrlValid(url) ? setImageFetchError("") : setImageFetchError(`"${url.length > 120 ? url.substring(0, 120) + '...' : url}" is invalid URL`);
+									}} disabled={imageFetchState === 'fetching'}/>
+
+								{ imageFetchState === 'idle' && <p>By pressing "Continue", you accept all possible risks and understand that no one affiliated 
+									with the development of this tool is responsible for any consequences.
+									<br/>
+									Do NOT enter ANY sensitive information in this field.</p> }
+							</>
 						}
 					</ModalWindow>
+				}
+
+				{
+					magickState !== 'uninitializedWithCache' && magickState !== 'initialized' &&
+						<ModalWindow key="magickStateModal" buttons={magickState === 'needsUpdate' || magickState === 'uninitializedWithoutCache' ? 1 : 0}
+							title={magickState === 'checkingForUpdates' ? 'Checking for updates...' :
+								magickState === 'needsUpdate' ? 'Update required' :
+								magickState === 'uninitializedWithoutCache' ? 'Attention required' :
+								'Loading...'}
+							okTitle={magickState === 'needsUpdate' ? 'Update' : 'Continue'}
+							{...magickState === 'needsUpdate' ? { okSvg: 'convert' } : {}}
+							onOK={magickState !== 'initializing' ? () =>
+								{
+									if (magickState === 'needsUpdate') imageMagickManager.UpdateMagick();
+									else initMagick();
+								} : undefined}>
+							{
+								magickState === 'needsUpdate' ? <p>This will clear the cache and reload the page</p> :
+								magickState === 'uninitializedWithoutCache' ? <p>This tool requires <a href='https://github.com/ImageMagick/ImageMagick' target='_blank'>ImageMagick</a> <a href='https://github.com/dlemstra/magick-wasm' target='_blank'>WASM library</a> to run.
+								<br/>
+								By pressing "Continue", you agree to download ~13.7 MB of content.</p> :
+								<p>Please wait...</p>
+							}
+						</ModalWindow>
 				}
 
 				{ !!error && <ModalWindow buttons={1} title='Error' cancelTitle='Reload the page' cancelSvg='' onCancel={() => window.location.reload()}><p>{error}</p></ModalWindow> }

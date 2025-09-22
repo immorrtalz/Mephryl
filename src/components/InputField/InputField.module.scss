@@ -1,0 +1,42 @@
+.inputField
+{
+	appearance: none;
+	-webkit-appearance: none;
+	outline: none;
+	border: none;
+	width: 500px;
+	height: 50px;
+	padding: 0 16px;
+	background: rgba(0, 0, 0, 0.15);
+	color: rgba(255, 255, 255, 0.75);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	border-radius: var(--main-border-radius);
+	text-align: left !important;
+	flex-shrink: 0;
+	pointer-events: all;
+	cursor: text;
+	overflow: visible;
+
+	&::placeholder
+	{
+		color: rgba(255, 255, 255, 0.35);
+		transition: all 0.2s;
+	}
+
+	&:hover, &:focus
+	{
+		background: rgba(0, 0, 0, 0.25);
+		color: rgba(255, 255, 255, 0.9);
+		border: 1px solid rgba(255, 255, 255, 0.25);
+
+		&::placeholder { color: rgba(255, 255, 255, 0.5); }
+	}
+
+	&:disabled
+	{
+		background: rgba(0, 0, 0, 0.05);
+		color: rgba(255, 255, 255, 0.25);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		pointer-events: none;
+	}
+}

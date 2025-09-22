@@ -69,6 +69,8 @@
 				flex-wrap: wrap;
 			}
 
+			& > p { max-width: 90%; }
+
 			& a
 			{
 				color: color-mix(in srgb, var(--clr-accent) 50%, white 50%);
@@ -76,6 +78,8 @@
 				&:hover { color: rgba(255, 255, 255, 0.9); }
 				&:active { color: rgba(255, 255, 255, 0.35); }
 			}
+
+			& input[type=text] { width: 500px; }
 		}
 
 		.buttons
