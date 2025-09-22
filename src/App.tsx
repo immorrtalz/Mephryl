@@ -181,7 +181,7 @@ export default function App()
 
 	const isImageFetchUrlValid = (url: string = ""): boolean =>
 	{
-		const loweredUrl = (!!url ? url : imageFetchUrl).toLowerCase();
+		const loweredUrl = (url || imageFetchUrl).toLowerCase();
 		return (loweredUrl.startsWith('http://') || loweredUrl.startsWith('https://')) && loweredUrl !== 'http://' && loweredUrl !== 'https://';
 	};
 
