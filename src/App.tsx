@@ -129,60 +129,55 @@ export default function App()
 	const addImageItems = (files: File[]) => setImageItems(prev => [...prev, ...files.map(file => new ImageItemInfo(file))]);
 	const onRemoveUploadedImageFile = (file: File) => setImageItems(prev => prev.filter(imageItem => imageItem.file !== file));
 
+	const urlToFilename = (url: string | null = null): string =>
+		(url || imageFetchUrl).replace('http://', '').replace('https://', '').replace(/[^a-zA-Z0-9\-_.]/g, '_') || `fetched_image_${Math.floor(Math.random() * 10000)}`;
+
+	const urlEllipsisClamp = (url: string | null = null, maxLength: number): string =>
+		(url || imageFetchUrl).length > maxLength ? imageFetchUrl.substring(0, maxLength) + '...' : imageFetchUrl;
+
 	const fetchImageFromUrl = async () =>
 	{
-		setImageFetchState('fetching');
-
-		if (isImageFetchUrlValid())
+		if (!isImageFetchUrlValid())
 		{
-			setImageFetchError("");
+			setImageFetchError(`"${urlEllipsisClamp(null, 120)}" is invalid URL`);
+			return;
+		}
 
-			try
-			{
-				fetch(imageFetchUrl)
-					.then(response => response.blob())
-					.then(blob =>
-					{
-						setImageFetchOpened(false);
-						setImageFetchState('idle');
-						addImageItems([new File([blob], (imageFetchUrl.replace('http://', '').replace('https://', '').replace(/[^a-zA-Z0-9\-_.]/g, '_')
-							|| `fetched_image_${Math.floor(Math.random() * 10000)}`), { type: blob.type })]);
-					})
-					.catch(() =>
-					{
-						fetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(imageFetchUrl)}`)
-							.then(response => response.blob())
-							.then(blob =>
-							{
-								setImageFetchOpened(false);
-								setImageFetchState('idle');
-								addImageItems([new File([blob], (imageFetchUrl.replace('http://', '').replace('https://', '').replace(/[^a-zA-Z0-9\-_.]/g, '_')
-									|| `fetched_image_${Math.floor(Math.random() * 10000)}`), { type: blob.type })]);
-							})
-							.catch(() =>
-							{
-								setImageFetchState('idle');
-								setImageFetchError(`Failed to fetch an image from "${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}"`);
-							});
-					});
-			}
+		setImageFetchState('fetching');
+		setImageFetchError("");
+
+		const tryFetch = async (url: string) =>
+		{
+			const response = await fetch(url);
+			const blob = await response.blob();
+			closeImageFetchModal();
+			addImageItems([new File([blob], urlToFilename(), { type: blob.type })]);
+		};
+
+		try { await tryFetch(imageFetchUrl); }
+		catch
+		{
+			try { await tryFetch(`https://api.allorigins.win/raw?url=${encodeURIComponent(imageFetchUrl)}`); }
 			catch
 			{
 				setImageFetchState('idle');
-				setImageFetchError(`Failed to fetch an image from "${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}"`);
+				setImageFetchError(`Failed to fetch an image from "${urlEllipsisClamp(null, 120)}"`);
 			}
 		}
-		else
-		{
-			setImageFetchState('idle');
-			setImageFetchError(`"${imageFetchUrl.length > 120 ? imageFetchUrl.substring(0, 120) + '...' : imageFetchUrl}" is invalid URL`);
-		}
-	}
+	};
 
 	const isImageFetchUrlValid = (url: string = ""): boolean =>
 	{
 		const loweredUrl = (url || imageFetchUrl).toLowerCase();
 		return (loweredUrl.startsWith('http://') || loweredUrl.startsWith('https://')) && loweredUrl !== 'http://' && loweredUrl !== 'https://';
+	};
+
+	const closeImageFetchModal = () =>
+	{
+		setImageFetchOpened(false);
+		setImageFetchState('idle');
+		setImageFetchUrl("");
+		setImageFetchError("");
 	};
 
 	const openConvertOptions = (targetIndex: number) =>
@@ -203,15 +198,6 @@ export default function App()
 	}
 
 	useEffect(() => setPhaseIndex(imageItems.length ? 1 : 0), [imageItems]);
-
-	useEffect(() =>
-	{
-		if (!isImageFetchOpened)
-		{
-			setImageFetchUrl("");
-			setImageFetchError("");
-		}
-	}, [isImageFetchOpened]);
 
 	useEffect(() =>
 	{
@@ -404,7 +390,7 @@ export default function App()
 						okTitle='Continue'
 						okSvg='download'
 						onOK={imageFetchState === 'idle' && isImageFetchUrlValid() ? fetchImageFromUrl : undefined}
-						onCancel={imageFetchState === 'idle' ? () => setImageFetchOpened(false) : undefined}>
+						onCancel={imageFetchState === 'idle' ? closeImageFetchModal : undefined}>
 						{
 							<>
 								{
