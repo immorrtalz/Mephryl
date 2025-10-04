@@ -1,6 +1,6 @@
 # <img src="https://github.com/user-attachments/assets/09bb04f0-5568-467a-8e6b-bfcce3115319" style="object-fit: contain; height: 32px;"/> Mephryl
 
-[![Latest Release](https://img.shields.io/badge/latest%20release-limegreen)](https://evermedia.immorrtalz.com/Mephryl)
+[![Latest Release](https://img.shields.io/badge/latest%20release-limegreen)](https://evermedia.immorrtalz.com/mephryl)
 [![License](https://img.shields.io/badge/license-GPL%20v3-yellow?color=goldenrod)](https://github.com/immorrtalz/Mephryl/blob/main/LICENSE)
 [![Last commit](https://img.shields.io/github/last-commit/immorrtalz/Mephryl?color=orange)]()
 [![CodeFactor](https://www.codefactor.io/repository/github/immorrtalz/Mephryl/badge)](https://www.codefactor.io/repository/github/immorrtalz/Mephryl)
