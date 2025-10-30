@@ -15,7 +15,7 @@ Open source, works 100% locally and available in web
 Supports **`avif`**, **`bmp`**, **`exr`**, **`gif`**, **`jpg`**, **`jp2`**, **`j2k`**, **`jpm`**, **`j2c`**, **`jpc`**, **`jxl`**, **`png`**, **`tif`** and **`webp`**
 
 > [!TIP]
-> Use the tool: https://evermedia.immorrtalz.com/Mephryl
+> Use the tool: https://evermedia.immorrtalz.com/mephryl
 
 ---
 
