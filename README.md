@@ -1,4 +1,4 @@
-# <img src="https://github.com/user-attachments/assets/09bb04f0-5568-467a-8e6b-bfcce3115319" style="object-fit: contain; height: 32px;"/> Mephryl
+<img src=".github/ReadmeHeader.png" alt="Mephryl"/>
 
 [![Latest Deployment](https://img.shields.io/website?url=https%3A%2F%2Fevermedia.immorrtalz.com%2Fmephryl)](https://evermedia.immorrtalz.com/mephryl)
 [![License](https://img.shields.io/badge/license-GPL%20v3-yellow?color=goldenrod)](https://github.com/immorrtalz/Mephryl/blob/main/LICENSE)
