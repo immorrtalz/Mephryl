@@ -213,7 +213,7 @@ export default function App()
 	return (
 		<div className={styles.pageContainer}>
 
-			<input id='imageInput' ref={imageInput} onInput={onImageInput} type='file' accept={supportedImageFormats.map(format => format.extension).join(', ')} multiple/>
+			<input id='imageInput' ref={imageInput} onChange={onImageInput} type='file' accept={supportedImageFormats.map(format => format.extension).join(', ')} multiple/>
 
 			<header>
 				<div className={styles.logo}>
