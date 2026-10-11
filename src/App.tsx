@@ -222,9 +222,9 @@ export default function App()
 				</div>
 
 				<a className={`${styles.linkUnderLogo} colorWhite50 font14 bgBlur`}
-					href='https://evermedia.immorrtalz.com'
+					href='https://immorrtalz.com'
 					target='_blank'>
-					by <span>EVERMEDIA PROJECT</span>
+					by <span>immorrtalz</span>
 				</a>
 			</header>
 
@@ -317,7 +317,7 @@ export default function App()
 			</main>
 
 			<footer>
-				<p className={`${styles.footerItem} font14`}>© {new Date().getFullYear()}, EVERMEDIA PROJECT</p>
+				<p className={`${styles.footerItem} font14`}>© {new Date().getFullYear()}, immorrtalz</p>
 				<p className={`${styles.footerItem} font14`}>Made with 💙</p>
 				<a className={`${styles.footerItem} font14`}
 					href='https://github.com/immorrtalz/Mephryl'
